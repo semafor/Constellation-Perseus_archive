@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+
+        <script src="http://yui.yahooapis.com/3.7.3/build/yui/yui-min.js"></script>
+        
+        <script src="utils/localstorage-sync.js"></script>
+
+        <!-- vorsum base -->
+        <script src="base/model.js"></script>
+        <script src="base/list.js"></script>
+        <script src="base/controller.js"></script>
+        <script src="base/enums.js"></script>
+
+        <!-- vorsum core -->
+        <script src="base/vorsum.js"></script>
+
+        <!-- game data -->
+        <script src="models/game-data.js"></script>
+
+        <!-- planet models -->
+        <script src="models/planet.js"></script>
+        <script src="lists/planet.js"></script>
+
+        <!-- ship models -->
+        <script src="models/ship.js"></script>
+        <script src="lists/ship.js"></script>
+        
+        <!-- player models -->
+        <script src="models/player.js"></script>
+        <script src="lists/player.js"></script>
+
+        <!-- action models -->
+        <script src="models/action.js"></script>
+        <script src="lists/action.js"></script>
+        
+        <!-- controllers -->
+        <script src="controllers/player.js"></script>
+        <script src="controllers/planet.js"></script>
+        <script src="controllers/game.js"></script>
+        <script src="controllers/action.js"></script>
+    </head>
+    <body>
+        <script>
+
+//window.localStorage.clear();
+
+        YUI().use('vorsum', function (Y) {
+
+            var game = new Y.VorsumGame();
+            window.game = game;
+                /**
+                player1 = game.createPlayer({
+                    name: 'Jens Schtoltenberg'
+                });
+
+
+                planet1 = game.createPlanet({
+                   name: 'Earth'
+                });
+                **/
+                /**
+                */
+                /**
+                // make planet1 attack planet2 when it has reached 10000 currency
+                planet1.after('currencyChange', function (e) {
+                    if(e.newVal === 3000) {
+                        console.info('attacking')
+                        planet1.attack(planet2);
+                    }
+                });
+                **/
+
+
+
+        });
+        </script>
+    </body>
+</html>
