@@ -3,40 +3,82 @@ One action per type
 
 */
 YUI.add('vorsum-action', function (Y) {
-    
+
+    var E = Y.VorsumEnums;
+
     Y.VorsumAction = Y.Base.create('action', Y.VorsumController, [], {
 
         initializer: function (config) {
+            var model;
 
-            // tock
-            this.on('tock', this.tock, this);
+            if(config.model) {
+
+                switch(config.model.get('type')) {
+                    case E.BUILD:
+                        model = Y.extend(config.model, Y.VorsumActionBuildModel);
+                        break;
+
+                    case E.ATTACK:
+                        model = Y.extend(config.model, Y.VorsumActionAttackModel);
+                        break;
+
+                    default:
+                        model = Y.extend(config.model, Y.VorsumActionModel);
+                        break;
+                }
+                
+            } else {
+
+                switch(config.type) {
+                    case E.BUILD:
+                        model = new Y.VorsumActionBuildModel(config);
+                        break;
+
+                    case E.ATTACK:
+                        model = new Y.VorsumActionAttackModel(config);
+                        break;
+
+                    default:
+                        model = new Y.VorsumActionModel(config);
+                        break;
+                }
+
+            }
+
+
+
+            this.setModel(model);
         },
 
         setStart: function () {
-            this.set('started', true).save();
+            this.modelSet('started', true).save();
         },
 
         setStop: function () {
-            this.set('started', false).save();
+            this.modelSet('started', false).save();
         },
 
         getIsStarted: function () {
-            return this.get('started');
+            return this.modelGet('started');
         },
 
         getIsRunning: function () {
-            return this.get('started') && !this.getIsFinished();
+            return this.modelGet('started') && !this.getIsFinished();
         },
 
         setFinished: function () {
-            this.set('finished', true).save();
+            this.modelSet('finished', true);
+            this.modelSet('active', false);
+
+            this.getModel().save();
+            
             this.fire('finished', {
                 action: this
             });
         },
 
         getIsFinished: function () {
-            return this.get('finished');
+            return this.modelGet('finished');
         },
 
         tick: function () {
@@ -44,55 +86,77 @@ YUI.add('vorsum-action', function (Y) {
             // move to next action
             if(this.getIsRunning()) {
 
-                this.processAction(this.getCurrentAction(), function () {
-                    // go to next action
-                    this.setNextAction();
-                });
+                this.processStep(this.getCurrentStep(), Y.bind(function (step, ok) {
+                    
+                    // remove tick on step
+                    if(ok) {
+                        step.ticks = step.ticks - 1;
+                        console.info('processed step', step.name);
+                    }
+
+                    // if there's no more ticks left,
+                    // go to next step
+                    if(step.ticks === 0) {
+                        this.setNextStep();
+                    }
+
+                }, this));
 
             }
 
-        },
-
-        processAction: function (action, callback) {
-
-            if (callback) {
-                callback();
-            }
-        },
-
-        setNextAction: function () {
-            var newActionIndex = this.get('actionIndex') + 1;
-
-            if(!this.get('actions')[newActionIndex]) {
-                this.finished();
-            } else {
-                this.set('actionIndex', newActionIndex);
+            // if we're done
+            if(!this.getCurrentStep()) {
+                console.info('action reporting that it is finished', this);
+                this.setStop();
+                this.setFinished();
             }
 
+            // save steps
+            this.getModel().save();
+
         },
 
-        getCurrentAction: function () {
-            return this.get('actions')[this.get('actionIndex')];
+        processStep: function (step, callback) {
+            var ok;
+            
+            // decide if this step can be done
+            ok = true;
+
+            if (!callback) {
+                throw new Error('processStep: needs callback');
+            }
+
+            callback(step, ok);
         },
 
-        getCurrentActionIndex: function () {
-            return this.get('actionIndex');
+        setNextStep: function () {
+            var newActionIndex = this.modelGet('stepIndex') + 1;
+
+            this.modelSet('stepIndex', newActionIndex);
+        },
+
+        getCurrentStep: function () {
+            return this.modelGet('steps')[this.modelGet('stepIndex')];
+        },
+
+        getCurrentStepIndex: function () {
+            return this.modelGet('stepIndex');
         },
 
         getNextAction: function () {
-            return this.get('actions')[this.get('actionIndex') + 1];
+            return this.modelGet('steps')[this.modelGet('stepIndex') + 1];
         },
 
         setCost: function (n) {
-            this.set('cost', n);
+            this.modelSet('cost', n);
         },
 
         getCost: function () {
-            return this.get('cost');
+            return this.modelGet('cost');
         },
 
         getNumberOfSteps: function () {
-            return this.get('actions').length;
+            return this.modelGet('steps').length;
         },
 
         getNumberOfStepsRemaining: function () {
@@ -103,30 +167,30 @@ YUI.add('vorsum-action', function (Y) {
             } else if(!this.getIsStarted()) {
                 ret = this.getNumberOfSteps();
             } else {
-                ret = this.getNumberOfSteps() - this.getCurrentActionIndex();
+                ret = this.getNumberOfSteps() - this.getCurrentStepIndex();
             }
 
             return ret;
         },
 
-        addStepToEnd: function (action) {
-            this.get('actions').push(action);
-            this.get('actions').save();
+        addStepToEnd: function (step) {
+            this.modelGet('steps').push(step);
+            this.modelGet('steps').save();
         },
 
-        addStepToBeginning: function (action) {
-            this.get('actions').unshift(action);
-            this.get('actions').save();
+        addStepToBeginning: function (step) {
+            this.modelGet('steps').unshift(step);
+            this.modelGet('steps').save();
         },
 
-        addStepAfterIndex: function (action, index) {
+        addStepAfterIndex: function (step, index) {
 
             if(!index) {
                 throw new Error('addStepToIndex: needs index argument');
             }
 
-            this.get('actions').splice(index, 0, action);
-            this.get('actions').save();
+            this.modelGet('steps').splice(index, 0, step);
+            this.modelGet('steps').save();
         }
 
     }, {
@@ -142,7 +206,7 @@ YUI.add('vorsum-action', function (Y) {
     };
     Y.extend(Y.VorsumActionAttack, Y.VorsumAction, {
 
-        processAction: function (action, callback) {
+        processStep: function (action, callback) {
 
             switch(action.name) {
 
@@ -163,9 +227,9 @@ YUI.add('vorsum-action', function (Y) {
 
         processAttack: function () {
 
-            var attackers = this.get('attackingForce'),
-                defenders = this.get('defendingForce'),
-                returnLength = this.get('actions')[0].ticks;
+            var attackers = this.modelGet('attackingForce'),
+                defenders = this.modelGet('defendingForce'),
+                returnLength = this.modelGet('steps')[0].ticks;
 
             if(attackers.length > defenders.length ) {
 
@@ -174,20 +238,20 @@ YUI.add('vorsum-action', function (Y) {
                     ticks: returnLength
                 });
 
-                this.set('outcome', VICTORY);
+                this.modelSet('outcome', VICTORY);
 
             } else if ( attackers.length === defenders.length ) {
 
                 this.addStepToEnd({
                     name: RETREAT,
-                    ticks: returnLength + this.get('retreatPenalty')
+                    ticks: returnLength + this.modelGet('retreatPenalty')
                 });
 
-                this.set('outcome', DEFEAT);
+                this.modelSet('outcome', DEFEAT);
 
             } else if ( attackers.length < defenders.length ) {
 
-                this.set('outcome', DEAD);
+                this.modelSet('outcome', DEAD);
 
             }
 
@@ -196,4 +260,8 @@ YUI.add('vorsum-action', function (Y) {
 
     });
 
+}, '0.0.1', {
+    use: [
+        'vorsum-enums'
+    ]
 });

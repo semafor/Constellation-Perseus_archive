@@ -16,7 +16,13 @@ YUI.add('vorsum-game', function (Y) {
             this.actions = new Y.VorsumActionList();
 
             this.on('*:requestAttack', this.tryAttack, this);
+            
+            this.on('action:finished', this.actionFinished, this);
 
+        },
+
+        actionFinished: function (e) {
+            console.info('finished action', e.action);
         },
 
         tryAttack: function (e) {
@@ -45,34 +51,14 @@ YUI.add('vorsum-game', function (Y) {
 
         },
 
-        createAttack: function (attacker, planet, force) {
+        createAction: function (config) {
+            var action = new Y.VorsumAction(config);
 
-        },
+            this.actions.addInstance(action);
 
-        allowAttack: function (request) {
-            request.requestee.fire('attackAllowed', {
-                request: request
-            });
+            action.addTarget(this);
 
-
-        },
-
-        disallowAttack: function (request) {
-            request.requestee.fire('attackDisallowed', {
-                request: request
-            });
-        },
-
-        allowPlanetSettle: function (request) {
-            request.requestee.fire('planetSettleAllowed', {
-                request: request
-            });
-        },
-
-        disAllowPlanetSettle: function (request) {
-            request.requestee.fire('planetSettleDisallowed', {
-                request: request
-            });
+            return action;
         },
 
         delegateTick: function () {
@@ -81,6 +67,9 @@ YUI.add('vorsum-game', function (Y) {
 
             // fire on all players
             this.players.fire('tick');
+
+            // fire on all actions
+            this.actions.fire('tick');
         },
 
         createPlanet: function (config) {
@@ -153,10 +142,6 @@ YUI.add('vorsum-game', function (Y) {
             // let gameData events bubble to this
             this.gameData.addTarget(this);
         },
-
-        loadActions: function () {
-            
-        }
 
 
     }, {

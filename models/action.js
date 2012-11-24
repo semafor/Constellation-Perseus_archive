@@ -28,19 +28,20 @@ YUI.add('vorsum-action-models', function (Y) {
 
     var E = Y.VorsumEnums;
 
-    Y.VorsumActionModel = Y.Base.create('actionModel', Y.Model, [], {
-
-        actionType: E.DEFAULT,
+    Y.VorsumActionModel = Y.Base.create('actionModel', Y.VorsumModel, [], {
 
         sync: Y.LocalStorageSync('actions'),
 
 
     }, {
         ATTRS: {
-            actions: {
+            type: {
+                value: E.DEFAULT
+            },
+            steps: {
                 value: []
             },
-            actionIndex: {
+            stepIndex: {
                 value: 0
             },
             started: {
@@ -62,109 +63,106 @@ YUI.add('vorsum-action-models', function (Y) {
     });
 
     // base build model
-    Y.VorsumActionBuildModel = function () {
-        VorsumActionBuildModel.superclass.constructor.apply(this, arguments);
-    };
-    Y.VorsumActionBuildModel.ATTRS = {
-        actions: {
-            value: [
+    Y.VorsumActionBuildModel = Y.Base.create('actionBuildModel', Y.VorsumActionModel, [], {
+    
 
-                {
-                    name: E.ORDERED,
-                    ticks: 1
-                },
+    }, {
+        ATTRS: {
+            type: {
+                value: E.BUILD
+            },
+            steps: {
+                value: [
+                    {
+                        name: E.ORDERED,
+                        ticks: 1
+                    },
 
-                {
-                    name: E.BUILDING,
-                    ticks: 3
-                },
+                    {
+                        name: E.BUILDING,
+                        ticks: 3
+                    },
 
-                {
-                    name: E.ASSEMBLING,
-                    ticks: 1
-                },
+                    {
+                        name: E.ASSEMBLING,
+                        ticks: 1
+                    },
 
-                {
-                    name: E.INSTALLING,
-                    ticks: 1
-                },
+                    {
+                        name: E.INSTALLING,
+                        ticks: 1
+                    },
 
-                {
-                    name: E.TESTING,
-                    ticks: 1
-                },
+                    {
+                        name: E.TESTING,
+                        ticks: 1
+                    },
 
-                {
-                    name: E.BRANDING,
-                    ticks: 1
-                },
+                    {
+                        name: E.BRANDING,
+                        ticks: 1
+                    },
 
-                {
-                    name: E.SHIPPING,
-                    ticks: 1
-                },
+                    {
+                        name: E.SHIPPING,
+                        ticks: 1
+                    },
 
-                {
-                    name: E.PROVISIONING,
-                    ticks: 1
-                }
+                    {
+                        name: E.PROVISIONING,
+                        ticks: 1
+                    }
 
-            ]
+                ]
+            }
         }
-    };
-
-    Y.extend(Y.VorsumActionBuildModel, Y.VorsumActionModel, {
-        actionType: E.BUILD
     });
 
     // base attack model
-    Y.VorsumActionAttackModel = function () {
-        VorsumActionAttackModel.superclass.constructor.apply(this, arguments);
-    };
-    Y.VorsumActionAttackModel.ATTRS = {
-        actions: {
-            value: [
+    Y.VorsumActionAttackModel = Y.Base.create('actionAttackModel', Y.VorsumActionModel, [], {
 
-                {
-                    name: E.ENROUTE,
-                    ticks: 6
-                },
+    }, {
+        ATTRS: {
+            type: {
+                value: E.ATTACK
+            },
+            steps: {
+                value: [
 
-                {
-                    name: E.SIEGE,
-                    ticks: 1
-                },
+                    {
+                        name: E.ENROUTE,
+                        ticks: 6
+                    },
 
-                {
-                    name: E.BATTLE,
-                    ticks: 1
-                }
+                    {
+                        name: E.SIEGE,
+                        ticks: 1
+                    },
 
-            ]
-        },
-        
-        attackingForce: {
-            value: null
-        },
+                    {
+                        name: E.BATTLE,
+                        ticks: 1
+                    }
 
-        defendingForce: {
-            value: null
-        },
+                ]
+            },
+            
+            attackingForce: {
+                value: null
+            },
 
-        outcome: {
-            value: E.UNFINISHED
-        },
+            defendingForce: {
+                value: null
+            },
 
-        retreatPenalty: {
-            value: 2 // how much longer the return will take if defeated
+            outcome: {
+                value: E.UNFINISHED
+            },
+
+            retreatPenalty: {
+                value: 2 // how much longer the return will take if defeated
+            }
         }
-    };
-
-    Y.extend(Y.VorsumActionAttackModel, Y.VorsumActionModel, {
-
-        actionType: E.ATTACK
-
-
     });
 
 }, '0.0.1', {

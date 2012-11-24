@@ -27,7 +27,19 @@ YUI.add('vorsum-enums', function (Y) {
         RETREAT :           'RETREAT', // defeat
         RETURN :            'RETURN', //  victory
         DEFECTED :          'DEFECTED', // lost force to enemy
-        DEAD :              'DEAD'
+        DEAD :              'DEAD',
+
+        // ship related
+        ATBASE: 'ATBASE',
+        ATTACKING: 'ATTACKING',
+        DEFENDING: 'DEFENDING',
+        DESTROYED: 'DESTROYED',
+        DEPRECATED: 'DEPRECATED',
+        DAMAGED: 'DAMAGED',
+        REPAIRING: 'REPAIRING',
+        ONFIRE: 'ONFIRE',
+        POWERLESS: 'POWERLESS',
+        UNMANNED: 'UNMANNED'
 
     };
 });
