@@ -22,18 +22,6 @@ YUI.add('vorsum-planet', function (Y) {
             this.increaseAge();
             this.increaseParticipation();
 
-            // gain currency
-            this.increaseCurrency();
-
-        },
-
-        increaseCurrency: function () {
-            var gain = this.modelGet('currency') + this.modelGet('currencyGainPerTick') * this.modelGet('currencyBonusModifier');
-            this.modelSet('currency', gain);
-        },
-
-        currencySubtract: function (decrease) {
-            this.modelSet('currency', this.modelGet('currency') - decrease);
         },
 
         getPubliclyAnnouncedInformation: function () {

@@ -19,6 +19,33 @@ YUI.add('vorsum-game', function (Y) {
             
             this.on('action:finished', this.actionFinished, this);
 
+            this.on('*:applyCost', this.tryApplyCost, this);
+
+        },
+
+        tryApplyCost: function (e) {
+            var source = e.target,
+                cost = e.cost,
+                requestee = e.requestee;
+
+            if(!requestee) {
+                throw new Error('Game.tryApplyCost: needs requestee');
+            }
+
+            if(!action) {
+                throw new Error('Game.tryApplyCost: missing source of cost apply');
+            }
+
+            if(!cost) {
+                throw new Error('Game.tryApplyCost: no cost given');
+            }
+
+            if(this.applyCostOnPlayer(requestee, cost)) {
+                source.fire('costApplied');
+            } else {
+                source.fire('costRefused');
+            }
+
         },
 
         actionFinished: function (e) {
@@ -58,6 +85,8 @@ YUI.add('vorsum-game', function (Y) {
 
             action.addTarget(this);
 
+            action.getModel().save();
+
             return action;
         },
 
@@ -90,6 +119,8 @@ YUI.add('vorsum-game', function (Y) {
             // put in list
             this.players.addInstance(player);
 
+            player.getModel().save();
+
             // let players talk to us
             player.addTarget(this);
 
@@ -120,6 +151,33 @@ YUI.add('vorsum-game', function (Y) {
             planet.set('ownerId', null).save();
         },
 
+        /**
+        @param {String|Player} p the player on which to apply cost
+        @param {Number} cost the cost to apply
+        @return {Boolean} if cost was applied or not
+        */
+        applyCostOnPlayer: function (p, cost) {
+            var player;
+
+            if(typeof p === 'string') {
+                player = this.players.getById(p);
+                console.info('getByClientId', this.players.getById(p));
+            } else {
+                player = p;
+            }
+
+            console.info(player, p);
+
+            if(!player) {
+                throw new Error('Game.applyCostOnPlayer: no player to apply cost on');
+            }
+
+            if(!cost) {
+                throw new Error('Game.applyCostOnPlayer: no cost to apply');
+            }
+
+            return player.applyCost(cost);
+        },
 
         loadGameData: function (err, res) {
             var c;

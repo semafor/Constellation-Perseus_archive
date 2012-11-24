@@ -9,6 +9,30 @@ YUI.add('vorsum-action', function (Y) {
     Y.VorsumAction = Y.Base.create('action', Y.VorsumController, [], {
 
         initializer: function (config) {
+
+            if(!config.requestee) {
+                throw new Error('Action.initializer: no requestee on action');
+            }
+
+            this.setModel(this.getAppropriateModel(config));
+
+            this.after('game:costApplied', this.costApplied, this);
+            this.after('game:costRefused', this.costRefused, this);
+        },
+
+        costApplied: function () {
+
+            this.setIsPaidFor();
+
+            // re-request start
+            this.requestStart();
+        },
+
+        costRefused: function () {
+            Y.log('Cost refused', 'info', 'Action.costRefused');
+        },
+
+        getAppropriateModel: function (config) {
             var model;
 
             if(config.model) {
@@ -45,9 +69,20 @@ YUI.add('vorsum-action', function (Y) {
 
             }
 
+            return model;
+        },
 
+        requestStart: function () {
 
-            this.setModel(model);
+            if(!this.getIsPaidFor()) {
+
+                this.applyCostOnRequestee();
+
+            } else {
+
+                this.setStart();
+
+            }
         },
 
         setStart: function () {
@@ -71,7 +106,7 @@ YUI.add('vorsum-action', function (Y) {
             this.modelSet('active', false);
 
             this.getModel().save();
-            
+
             this.fire('finished', {
                 action: this
             });
@@ -81,10 +116,20 @@ YUI.add('vorsum-action', function (Y) {
             return this.modelGet('finished');
         },
 
+        setIsPaidFor: function () {
+            this.modelSet('paid', true);
+        },
+
+        getIsPaidFor: function () {
+            return this.modelGet('paid');
+        },
+
         tick: function () {
 
-            // move to next action
-            if(this.getIsRunning()) {
+
+
+            // move to next action if running and paid for
+            if(this.getIsRunning() && this.getIsPaidFor()) {
 
                 this.processStep(this.getCurrentStep(), Y.bind(function (step, ok) {
                     
@@ -112,6 +157,7 @@ YUI.add('vorsum-action', function (Y) {
             }
 
             // save steps
+            // fixme, check saves on this model, may be too many
             this.getModel().save();
 
         },
@@ -191,6 +237,22 @@ YUI.add('vorsum-action', function (Y) {
 
             this.modelGet('steps').splice(index, 0, step);
             this.modelGet('steps').save();
+        },
+
+        getRequestee: function () {
+            return this.modelGet('requestee');
+        },
+
+        applyCostOnRequestee: function () {
+
+            if(this.getIsPaidFor()) {
+                throw new Error('Action.applyCostOnRequestee: attempted to re-apply cost.');
+            }
+            
+            this.fire('applyCost', {
+                requestee: this.getRequestee(),
+                cost: this.modelGet('cost')
+            });
         }
 
     }, {

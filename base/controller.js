@@ -40,6 +40,25 @@ YUI.add('vorsum-controller', function (Y) {
             this.modelSet('ticksParticipation', this.modelGet('ticksParticipation') + 1);
         },
 
+        increaseCurrency: function () {
+            var gain = this.modelGet('currency') + this.modelGet('currencyGainPerTick') * this.modelGet('currencyBonusModifier');
+            this.modelSet('currency', gain);
+        },
+
+        applyCost: function (cost) {
+            var currentCurrency = this.modelGet('currency'),
+                applied = false;
+
+            if( ( currentCurrency - cost ) < 0 ) {
+                Y.log('Not enough currency to do transaction', 'warn', 'Controller.applyCost');
+            } else {
+                this.modelSet('currency', currentCurrency - cost);
+                applied = true;
+            }
+
+            return applied;
+        },
+
         tick: function () {
             Y.log(this.getPubliclyAnnouncedInformation(), 'note', '');
         },

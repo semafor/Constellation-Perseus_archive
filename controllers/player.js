@@ -48,6 +48,9 @@ YUI.add('vorsum-player', function (Y) {
 
             this.increaseAge();
             this.increaseParticipation();
+
+            // gain currency
+            this.increaseCurrency();
         },
 
         getPubliclyAnnouncedInformation: function () {

@@ -38,9 +38,13 @@ YUI.add('vorsum-action-models', function (Y) {
             type: {
                 value: E.DEFAULT
             },
+
+            // stuff to do to complete this action
             steps: {
                 value: []
             },
+
+            // at what step are we
             stepIndex: {
                 value: 0
             },
@@ -50,13 +54,24 @@ YUI.add('vorsum-action-models', function (Y) {
             finished: {
                 value: false
             },
+
+            // how much currency does this cost
             cost: {
                 value: 0
             },
+
+            // whether or not it is payed for
+            paid: {
+                value: false
+            },
+
+            // who requested action
             requestee: {
                 value: null
             },
-            goal: {
+
+            // what comes of this action
+            result: {
                 value: null
             }
         }
@@ -114,6 +129,9 @@ YUI.add('vorsum-action-models', function (Y) {
                     }
 
                 ]
+            },
+            cost: {
+                value: 1000 // for now
             }
         }
     });

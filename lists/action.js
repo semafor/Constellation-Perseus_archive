@@ -28,6 +28,17 @@ YUI.add('vorsum-action-list', function (Y) {
             }));
         },
 
+        getAllStartedInstances: function () {
+            return Y.Array.filter(this.getAllInstances(), function (instance) {
+                return instance.getIsStarted();
+            });
+        },
+
+        // active are started ones, not just active
+        getActiveInstances: function () {
+            return this.getAllStartedInstances();
+        }
+
 
     });
 });
