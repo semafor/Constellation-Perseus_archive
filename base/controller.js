@@ -10,6 +10,9 @@ YUI.add('vorsum-controller', function (Y) {
 
         setModel: function (model) {
             this.model = model;
+
+            // let model talk to controller
+            model.addTarget(this);
         },
 
         getModel: function () {
@@ -45,23 +48,27 @@ YUI.add('vorsum-controller', function (Y) {
             this.modelSet('currency', gain);
         },
 
-        applyCost: function (cost) {
+
+        applyCost: function (e) {
             var currentCurrency = this.modelGet('currency'),
+                cost = e.cost,
+                callback = e.callback,
                 applied = false;
 
             if( ( currentCurrency - cost ) < 0 ) {
                 Y.log('Not enough currency to do transaction', 'warn', 'Controller.applyCost');
             } else {
+                Y.log('Enough currency to do transaction', 'info', 'Controller.applyCost');
                 this.modelSet('currency', currentCurrency - cost);
                 applied = true;
             }
 
-            return applied;
+            callback(applied);
         },
 
         tick: function () {
             Y.log(this.getPubliclyAnnouncedInformation(), 'note', '');
-        },
+        }
 
 
 

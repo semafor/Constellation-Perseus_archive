@@ -16,12 +16,12 @@ YUI.add('vorsum-action', function (Y) {
 
             this.setModel(this.getAppropriateModel(config));
 
-            this.after('game:costApplied', this.costApplied, this);
-            this.after('game:costRefused', this.costRefused, this);
+            this.after('*:costApplied', this.costApplied, this);
+            this.after('*:costRefused', this.costRefused, this);
         },
 
         costApplied: function () {
-
+            Y.log('Cost applied', 'note', 'Action.costApplied');
             this.setIsPaidFor();
 
             // re-request start
@@ -249,10 +249,12 @@ YUI.add('vorsum-action', function (Y) {
                 throw new Error('Action.applyCostOnRequestee: attempted to re-apply cost.');
             }
             
-            this.fire('applyCost', {
+            this.fire('tryApplyCost', {
                 requestee: this.getRequestee(),
                 cost: this.modelGet('cost')
             });
+
+            Y.log('fired tryApplyCost', 'note', 'Action.applyCostOnRequestee');
         }
 
     }, {

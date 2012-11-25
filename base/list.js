@@ -8,6 +8,10 @@ YUI.add('vorsum-list', function (Y) {
 
             this.on('tick', this.distributeTick, this);
 
+            this.on('applyCost', function () {
+                console.info('list received applyCost');
+            })
+
         },
 
         distributeTick: function () {
@@ -24,7 +28,10 @@ YUI.add('vorsum-list', function (Y) {
         },
 
         addInstance: function (instance) {
+            // register model
             this.add(instance.getModel());
+
+            // register controller instance
             this.instances.push(instance);
         },
 
