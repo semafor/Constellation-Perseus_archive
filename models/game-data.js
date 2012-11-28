@@ -49,7 +49,7 @@ YUI.add('vorsum-game-data', function (Y) {
                 value: 1000000
             },
             dayLength: {
-                value: 10000
+                value: 1000
             },
             ticker: {
                 value: 0

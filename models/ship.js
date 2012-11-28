@@ -1,8 +1,6 @@
 YUI.add('vorsum-ship-model', function (Y) {
 
-    var ENUMS = {
-
-    };
+    var E = Y.VorsumEnums;
 
     Y.VorsumShipModel = Y.Base.create('shipModel', Y.VorsumModel, [], {
         
@@ -17,31 +15,9 @@ YUI.add('vorsum-ship-model', function (Y) {
 
         },
 
-        getStatus: function () {
-
-        },
-
-        setStatus: function (val) {
-            console.info(this, val);
-        },
-
-        getOwner: function () {
-            return this.get('owner');
-        },
-
-        setOwner: function (ownerId) {
-            this.set('owner', ownerId);
-        },
-
     }, {
         ATTRS: {
-            
-            status: {
-                value: [],
-                getter: 'getStatus',
-                setter: 'setStatus'
-            },
-            
+
             base: {
                 value: null
             },
@@ -57,8 +33,4 @@ YUI.add('vorsum-ship-model', function (Y) {
 
         }
     });
-}, '0.0.1', {
-    use: [
-        'vorsum-enums'
-    ]
 });

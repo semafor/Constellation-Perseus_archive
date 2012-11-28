@@ -21,6 +21,15 @@ YUI.add('vorsum-game', function (Y) {
 
             this.on('*:tryApplyCost', this.tryApplyCost, this);
 
+            this.on('*:transferResultToRequestee', this.transferResultToRequestee, this);
+
+        },
+
+        transferResultToRequestee: function (e) {
+            var requestee = this.getPlayer(e.requestee),
+                result = e.result;
+
+            requestee.recieveResultsFromAction(result);
         },
 
         /**
@@ -59,7 +68,7 @@ YUI.add('vorsum-game', function (Y) {
             var ruling = false,
                 request = {
                     requestee: e.target,
-                    target: e.actionet,
+                    target: e.actione,
                     force: e.force
                 };
 
@@ -154,6 +163,23 @@ YUI.add('vorsum-game', function (Y) {
             planet.set('ownerId', null).save();
         },
 
+        getPlayer: function (p) {
+            var player;
+
+            if(typeof p === 'string') {
+                player = this.players.getInstanceById(p);
+            } else {
+                // surely a model
+                player = this.players.getInstanceById(p.getId());
+            }
+
+            if( !(player instanceof Y.VorsumPlayer) ) {
+                throw new Error('Game.getPlayer: player not a player controller');
+            }
+
+            return player;
+        },
+
         /**
 
         Async function that applies cost on player
@@ -163,17 +189,10 @@ YUI.add('vorsum-game', function (Y) {
         @param {Number} cost the cost to apply
         @return {Boolean} if cost was applied or not
         */
-        applyCostOnPlayer: function (p, cost, callback) {
-            var player,
+        applyCostOnPlayer: function (p, cost) {
+            var player = this.getPlayer(p),
                 applied;
 
-
-            if(typeof p === 'string') {
-                player = this.players.getInstanceById(p);
-            } else {
-                // surely a model
-                player = this.players.getInstanceById(p.getId());
-            }
 
             if(!player) {
                 throw new Error('Game.applyCostOnPlayer: no player to apply cost on');
@@ -183,9 +202,6 @@ YUI.add('vorsum-game', function (Y) {
                 throw new Error('Game.applyCostOnPlayer: no cost to apply');
             }
 
-            if( !(player instanceof Y.VorsumPlayer) ) {
-                throw new Error('Game.applyCostOnPlayer: player not a player controller');
-            }
 
             if(player.getCanAfford(cost)) {
                 Y.log('player can afford it', 'note', 'Game.applyCostOnPlayer');

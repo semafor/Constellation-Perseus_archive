@@ -55,11 +55,6 @@ YUI.add('vorsum-action-models', function (Y) {
                 value: false
             },
 
-            // how much currency does this cost
-            cost: {
-                value: 0
-            },
-
             // whether or not it is payed for
             paid: {
                 value: false
@@ -70,9 +65,21 @@ YUI.add('vorsum-action-models', function (Y) {
                 value: null
             },
 
-            // what comes of this action
-            result: {
-                value: null
+            /**
+            items ordered
+            should be an array of things to build
+
+            [
+                {
+                    name: ENUM,
+                    cost: 1000,
+                    minParticipation: 1000
+                }
+            ]
+
+            **/
+            order: {
+                value: []
             }
         }
     });
@@ -183,8 +190,4 @@ YUI.add('vorsum-action-models', function (Y) {
         }
     });
 
-}, '0.0.1', {
-    use: [
-        'vorsum-enums'
-    ]
 });

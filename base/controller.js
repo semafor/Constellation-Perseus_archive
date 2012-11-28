@@ -27,6 +27,14 @@ YUI.add('vorsum-controller', function (Y) {
             return this.getModel().set(what, value).save();
         },
 
+        modelSetMany: function (config) {
+            this.getModel().setAttrs(config).save();
+        },
+
+        modelGetMany: function (config) {
+            return this.getModel().getAttrs(config);
+        },
+
         getIsActive: function () {
             return this.modelGet('active');
         },
@@ -53,11 +61,11 @@ YUI.add('vorsum-controller', function (Y) {
         },
 
         getCanAfford: function (amount) {
-            if( !( !isNaN(parseFloat(n)) && isFinite(n) ) ) {
+            if( !( !isNaN(parseFloat(amount)) && isFinite(amount) ) ) {
                 throw new Error('Controller.getCanAfford: NaN');
             }
             
-            return parseInt(this.modelGet('currency'), 10) - amount) >= 0;
+            return (parseInt(this.modelGet('currency'), 10) - amount) >= 0;
         },
 
         tick: function () {

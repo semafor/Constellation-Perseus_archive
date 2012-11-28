@@ -15,29 +15,6 @@ YUI.add('vorsum-player', function (Y) {
             this.getModel().addTarget(this);
         },
 
-        settlePlanet: function () {
-
-        },
-
-        leavePlanet: function () {
-
-        },
-
-        requestAttack: function (planet, force) {
-            this.fire('requestAttack', {
-                planet: planet,
-                force: force
-            });
-            console.info('requested attack');
-        },
-
-        executeAttack: function (e) {
-            console.info('player: attack allowed', e);
-        },
-
-        abortAttack: function (e) {
-            console.info('player: attack disallowed', e);
-        },
 
         // tick related functions
 
@@ -55,6 +32,10 @@ YUI.add('vorsum-player', function (Y) {
         getPubliclyAnnouncedInformation: function () {
             var status = this.modelGet('active') ? 'active' : 'inactive';
             return this.modelGet('name') + ' is an ' + status + ' player';
+        },
+
+        recieveResultsFromAction: function (result) {
+            console.info('got results from action', result);
         }
 
 

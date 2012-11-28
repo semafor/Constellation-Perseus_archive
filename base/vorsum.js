@@ -9,6 +9,7 @@ YUI.add('vorsum', function (Y) {
         'vorsum-controller',
         'vorsum-model',
         'vorsum-list',
+        'vorsum-enums',
 
         // game core
         'vorsum-game',
@@ -25,6 +26,7 @@ YUI.add('vorsum', function (Y) {
         'vorsum-planet-list',
 
         // ship
+        'vorsum-ship',
         'vorsum-ship-model',
         'vorsum-ship-list',
 

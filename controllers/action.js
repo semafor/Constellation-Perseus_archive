@@ -99,10 +99,13 @@ YUI.add('vorsum-action', function (Y) {
         },
 
         setFinished: function () {
-            this.modelSet('finished', true);
-            this.modelSet('active', false);
 
-            this.getModel().save();
+            this.modelSetMany({
+                finished: true,
+                active: false
+            });
+
+            this.transferResultToRequestee();
 
             this.fire('finished', {
                 action: this
@@ -190,12 +193,26 @@ YUI.add('vorsum-action', function (Y) {
             return this.modelGet('steps')[this.modelGet('stepIndex') + 1];
         },
 
-        setCost: function (n) {
-            this.modelSet('cost', n);
-        },
-
         getCost: function () {
-            return this.modelGet('cost');
+            var order = this.modelGet('order'),
+                cost = 0;
+            
+            // TODO: should be validator on model
+            if(order.length === 0) {
+                throw new Error('Action.getCost: order length is 0');
+            }
+
+            Y.Array.each(order, function (item) {
+
+                // if not supplied, it's free
+                if(!cost) {
+                    cost = 0;
+                }
+
+                cost = cost + item.cost;
+            });
+
+            return cost;
         },
 
         getNumberOfSteps: function () {
@@ -240,6 +257,21 @@ YUI.add('vorsum-action', function (Y) {
             return this.modelGet('requestee');
         },
 
+        // returns the ENUM for what's being built
+        getResult: function () {
+            return Y.Array.map(this.modelGet('order'), function (item) {
+                return item.name;
+            });
+        },
+
+        transferResultToRequestee: function () {
+            Y.log('transferring', 'note', 'Action.transferResultToRequestee');
+            this.fire('transferResultToRequestee', {
+                requestee: this.getRequestee(),
+                result: this.getResult()
+            });
+        },
+
         applyCostOnRequestee: function () {
 
             if(this.getIsPaidFor()) {
@@ -248,7 +280,7 @@ YUI.add('vorsum-action', function (Y) {
             
             this.fire('tryApplyCost', {
                 requestee: this.getRequestee(),
-                cost: this.modelGet('cost')
+                cost: this.getCost()
             });
 
             Y.log('fired tryApplyCost', 'note', 'Action.applyCostOnRequestee');
@@ -321,8 +353,4 @@ YUI.add('vorsum-action', function (Y) {
 
     });
 
-}, '0.0.1', {
-    use: [
-        'vorsum-enums'
-    ]
 });

@@ -7,17 +7,16 @@
         <meta name="viewport" content="width=device-width">
 
         <script src="http://yui.yahooapis.com/3.7.3/build/yui/yui-min.js"></script>
-        
         <script src="utils/localstorage-sync.js"></script>
+
+        <!-- vorsum core -->
+        <script src="base/vorsum.js"></script>
 
         <!-- vorsum base -->
         <script src="base/model.js"></script>
         <script src="base/list.js"></script>
         <script src="base/controller.js"></script>
         <script src="base/enums.js"></script>
-
-        <!-- vorsum core -->
-        <script src="base/vorsum.js"></script>
 
         <!-- game data -->
         <script src="models/game-data.js"></script>
@@ -43,6 +42,7 @@
         <script src="controllers/planet.js"></script>
         <script src="controllers/game.js"></script>
         <script src="controllers/action.js"></script>
+        <script src="controllers/ship.js"></script>
     </head>
     <body>
         <script>
@@ -51,13 +51,27 @@ window.localStorage.clear();
 
         YUI().use('vorsum', function (Y) {
 
-            var game = new Y.VorsumGame();
+
+            var game = new Y.VorsumGame(),
+                E = Y.VorsumEnums;
+
             window.game = game;
-                /**
-                player1 = game.createPlayer({
+                window.player = game.createPlayer({
                     name: 'Jens Schtoltenberg'
                 });
 
+                window.action = window.game.createAction({ 
+                    type: E.BUILD,
+                    requestee: window.player.getId(),
+                    order: [
+                        E.SHIP_SCOUT,
+                        E.SHIP_SCOUT,
+                        E.SHIP_PATROL
+                    ]
+                });
+                window.action.requestStart();
+
+                /**
 
                 planet1 = game.createPlanet({
                    name: 'Earth'
