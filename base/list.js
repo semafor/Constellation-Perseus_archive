@@ -28,11 +28,22 @@ YUI.add('vorsum-list', function (Y) {
         },
 
         addInstance: function (instance) {
+            var model = instance.getModel();
+
+            if(!model.get('id')) {
+                model.save();
+            }
+
             // register model
-            this.add(instance.getModel());
+            this.add(model);
 
             // register controller instance
+            instance.id = model.get('id');
             this.instances.push(instance);
+
+            if(!instance.id) {
+                throw new Error('List.addInstance: instance lacks id');
+            }
         },
 
         removeInstance: function(instance) {
@@ -53,6 +64,16 @@ YUI.add('vorsum-list', function (Y) {
             return Y.Array.filter(this.getAllInstances(), function (instance) {
                 return instance.getIsActive();
             });
+        },
+
+        getInstanceById: function (id) {
+            var res = Y.Array.find(this.instances, function (item) {
+                return item.id === id;
+            });
+            if(!res) {
+                throw new Error('List.getInstanceById: failed to find instance with id '+id);
+            }
+            return res;
         }
 
 

@@ -15,9 +15,6 @@ YUI.add('vorsum-action', function (Y) {
             }
 
             this.setModel(this.getAppropriateModel(config));
-
-            this.after('*:costApplied', this.costApplied, this);
-            this.after('*:costRefused', this.costRefused, this);
         },
 
         costApplied: function () {
@@ -29,7 +26,7 @@ YUI.add('vorsum-action', function (Y) {
         },
 
         costRefused: function () {
-            Y.log('Cost refused', 'info', 'Action.costRefused');
+            Y.log('Cost refused (noop)', 'info', 'Action.costRefused');
         },
 
         getAppropriateModel: function (config) {

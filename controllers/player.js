@@ -13,9 +13,6 @@ YUI.add('vorsum-player', function (Y) {
             }
 
             this.getModel().addTarget(this);
-
-            this.getModel().on('applyCost', this.applyCost, this);
-
         },
 
         settlePlanet: function () {
