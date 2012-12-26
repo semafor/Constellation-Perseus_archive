@@ -1,5 +1,12 @@
 import uuid
 
+DEFAULT_TRAVEL_TIME = 8
+
+ENROUTE = "enroute"
+ATTACK = "attack"
+DEFENCE = "defence"
+RETURN = "return"
+
 
 class Game():
     def __init__(self):
@@ -32,7 +39,7 @@ class Game():
         return game_object
 
     def create_player(self, name, **kwargs):
-        """Return None if name is empty or allready existing username else create a player object and return it."""
+        """Return None if name is empty or already existing username else create a player object and return it."""
         if ((type("")) != type(name)):
             name = str(name)
         name = name.strip()
@@ -70,7 +77,7 @@ class Game():
             }
         }
 
-    def buy_ships(self, player, ship_enum, amount):
+    def buy_ships(self, player, ship_enum, amount, fleet_index=0):
         """Return False iff not enough elements.
 
         Keyword arguments:
@@ -113,9 +120,33 @@ class Game():
         # subtract elements
         player.set_elements(player_elements - total_amount)
 
-        player.add_ships(ships)
+        player.add_ships(ships, fleet_index)
 
         return True
+
+    def attack(self, attacking_player, defending_player, fleet_index, target_stay):
+        if(type(attacking_player) != type(Player(name="x"))):
+            raise ValueError("Attacking player needs to be Player, not %s" % str(attacking_player))
+
+        if(type(defending_player) != type(Player(name="x"))):
+            raise ValueError("Defending player needs to be Player, not %s" % str(defending_player))
+
+        if(type(fleet_index) != type(1)):
+            raise ValueError("Attacker must specify fleet, other than %s" % str(fleet_index))
+
+        if(type(target_stay) != type(1)):
+            raise ValueError("Specify for how long attack will last, not %s" % str(target_stay))
+
+        if(len(attacking_player.get_fleet(fleet_index).get_ships()) == 0):
+            raise GameException("Attacking player have no ships in fleet %d" % fleet_index)
+            return False
+
+        #player, target, mission_type, target_stay):
+        fleet = attacking_player.get_fleet(fleet_index)
+        mission = Mission(attacking_player, defending_player, ATTACK, target_stay)
+        fleet.set_mission(mission)
+
+        return mission
 
     def get_by_id(self, thing_id):
         return self.game_object_by_uuid[thing_id]
@@ -216,14 +247,32 @@ class Player(GameObject):
 
         self.ships = []
 
+        self.fleets = [
+            Fleet(),
+            Fleet(),
+            Fleet()
+        ]
+
+        self.fleets[0].assign_ships(self.ships)
+
         self.display_name = "%s, a stellar commander. Workforce: %d" \
             % (self.name, self.workforce)
+
+    def get_fleet(self, index):
+        return self.fleets[index]
+
+    def get_fleets(self):
+        return self.fleets
 
     def get_planetary(self):
         return self.planetary
 
     def set_planetary(self, planetary_id):
+        self.data_invariant()
+
         self.planetary = planetary_id
+
+        self.data_invariant()
 
     def get_elements(self):
         return self.elements
@@ -232,14 +281,23 @@ class Player(GameObject):
         return self.ships
 
     def set_elements(self, elements):
+        self.data_invariant()
+
         self.elements = elements
 
-    def add_ships(self, ships):
+        self.data_invariant()
+
+    def add_ships(self, ships, fleet_index):
         self.data_invariant()
 
         self.ships = self.ships + ships
 
+        self.get_fleet(fleet_index).append_ships(ships)
+
         self.data_invariant()
+
+    def get_travel_time(self):
+        return DEFAULT_TRAVEL_TIME
 
     def get_ship_total(self):
         total = 0
@@ -252,7 +310,13 @@ class Player(GameObject):
         pass
 
     def tick(self):
-        print "Tick on %s" % self.get_display_name()
+        self.data_invariant()
+
+        #print "Tick on %s" % self.get_display_name()
+        for fleet in self.get_fleets():
+            fleet.tick()
+
+        self.data_invariant()
 
     def data_invariant(self):
 
@@ -282,6 +346,10 @@ class Player(GameObject):
             pass
         else:
             raise ValueError("Player planetary must be None or a Planetary %s" % str(self.planetary))
+
+        # fleets
+        if not type(self.fleets[0]) == type(Fleet()):
+            raise ValueError("Player fleet must be a Fleet, %s" % str(self.fleets))
 
 
 class Planetary(GameObject):
@@ -332,7 +400,6 @@ class Ship(GameObject):
 
         self.display_name = "%s, a ship, class %d, costing %d" \
             % (self.name, self.ship_class, self.price)
-
 
     def get_attack_points(self):
         points = 1
@@ -403,6 +470,80 @@ class Ship(GameObject):
             'Dreadnaught',
             'Galactic Supernaught'
         ][self.ship_class]
+
+
+class Mission():
+    def __init__(self, player, target, mission_type, target_stay):
+
+        self.plan = []
+
+        if(type(player) != type(Player(name="x"))):
+            raise ValueError("Player needs to be Player, not %s" % str(player))
+
+        if(type(target) != type(Planetary(name="x"))):
+            raise ValueError("Target needs to be planetary, not %s" % str(target))
+
+        if not mission_type == ATTACK or mission_type == DEFENCE:
+            raise ValueError("mission_type needs to be %s or %s, not %s" % (ATTACK, DEFENCE, str(mission_type)))
+
+        if not target_stay:
+            raise ValueError("need to %s n ticks, not %s" % (mission_type, str(target_stay)))
+
+        travel_penalty = player.get_travel_time()
+
+        # create en route travel
+        for ticks in range(travel_penalty):
+            self.plan.append(ENROUTE)
+
+        for ticks in range(target_stay):
+            self.plan.append(mission_type)
+
+        for ticks in range(travel_penalty):
+            self.plan.append(RETURN)
+
+    def tick(self):
+        self.plan = self.plan.pop(0)
+
+    def get_current_item(self):
+        return self.plan[0]
+
+    def get_next_item(self):
+        return self.plan[1]
+
+    def get_remaining_items(self):
+        return self.plan[1:]
+
+    def get_plan(self):
+        return self.plan
+
+
+class Fleet():
+    def __init__(self):
+
+        self.ships = []
+        self.mission = None
+
+    def assign_ships(self, ships):
+        if(type(ships) != type([])):
+            raise ValueError("Ships need to come as list, not %s" % str(ships))
+
+        self.ships = ships
+
+    def append_ships(self, ships):
+        if(type(ships) != type([])):
+            raise ValueError("Ships need to come as list, not %s" % str(ships))
+
+        self.ships = self.ships + ships
+
+    def set_mission(self, mission):
+        self.mission = mission
+
+    def get_ships(self):
+        return self.ships
+
+    def tick(self):
+        if(self.mission):
+            self.mission.tick()
 
 
 class GameException(Exception):

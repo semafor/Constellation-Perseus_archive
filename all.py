@@ -201,6 +201,22 @@ class Console(cmd.Cmd):
         else:
             print "Failed to buy ships."
 
+    def do_attack(self, args):
+        """Execute attack"""
+        args = shlex.split(args)
+        help_usage = "usage: attack <attacker> <defender> <fleet_index> <n ticks length of attack>"
+
+        attacker = self.normalize_query(args[0])[0]
+        defender = self.normalize_query(args[1])[0]
+        fleet_index = int(args[2])
+        attack_length = int(args[3])
+
+        mission = self.game.attack(attacker, defender, fleet_index, attack_length)
+
+        if mission:
+            print "Attack with plan %s" % str(mission.get_plan())
+        else:
+            print "Failed to attack"
 
     ## The end of game commands
     #
