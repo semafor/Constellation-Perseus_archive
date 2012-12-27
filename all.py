@@ -63,7 +63,7 @@ class Console(cmd.Cmd):
             if(what == "player"):
                 args = {
                     "name": name,
-                    "elements": 1000
+                    "allotropes": 1000
                 }
             else:
                 args = {
@@ -142,7 +142,7 @@ class Console(cmd.Cmd):
 
         for player in players:
             print "Status for player \"%s\":" % player.get_name()
-            print "\tElements: %d" % player.get_elements()
+            print "\tElements: %d" % player.get_allotropes()
             print "\tShips: %d (ship points: %d)" % (len(player.get_ships()), player.get_ship_total())
 
             for n, ship in enumerate(player.get_ships()):
@@ -229,13 +229,13 @@ class Console(cmd.Cmd):
             print "Failed to attack"
 
     def do_test(self, args):
-        player_a = self.game.create(game.Player, name="a", elements=1000)
+        player_a = self.game.create(game.Player, name="a", allotropes=1000)
         print "* new player %s (%s)" % (player_a.get_name(), player_a.get_id())
 
         self.game.buy_ships(player_a, "ain", 4)
         print "* new player %s %d ships of type %s" % (player_a.get_name(), 4, "ain")
 
-        player_b = self.game.create(game.Player, name="b", elements=1000)
+        player_b = self.game.create(game.Player, name="b", allotropes=1000)
         print "* new player %s (%s)" % (player_b.get_name(), player_b.get_id())
 
         self.game.buy_ships(player_b, "beid", 3)
@@ -288,7 +288,7 @@ class Console(cmd.Cmd):
         #
         self.game = game.Game()
 
-        player = self.game.create(game.Player, name="Dummy Player", elements=10000)
+        player = self.game.create(game.Player, name="Dummy Player", allotropes=10000)
         print "* new player %s (%s)" % (player.get_name(), player.get_id())
 
         planetary = self.game.create(game.Planetary, name="Dummy Planetary")

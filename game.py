@@ -1,6 +1,6 @@
 import uuid
 
-DEFAULT_TRAVEL_TIME = 8
+DEFAULT_TRAVEL_TIME = 2
 
 ENROUTE = "enroute"
 ATTACK = "attack"
@@ -79,7 +79,7 @@ class Game():
         }
 
     def buy_ships(self, player, ship_enum, amount, fleet_index=0):
-        """Return False iff not enough elements.
+        """Return False iff not enough allotropes.
 
         Keyword arguments:
         """
@@ -105,12 +105,12 @@ class Game():
 
         total_amount = available_ships[ship_enum]["price"] * amount
 
-        player_elements = player.get_elements()
+        player_allotropes = player.get_allotropes()
 
-        #print "total_amount %d, player_elements %d" % (int(total_amount), int(player_elements))
+        #print "total_amount %d, player_allotropes %d" % (int(total_amount), int(player_allotropes))
 
         # check if player can afford it
-        if (total_amount > player_elements):
+        if (total_amount > player_allotropes):
             return False
 
         for i in range(amount):
@@ -118,8 +118,8 @@ class Game():
 
             ships.append(s)
 
-        # subtract elements
-        player.set_elements(player_elements - total_amount)
+        # subtract allotropes
+        player.set_allotropes(player_allotropes - total_amount)
 
         player.add_ships(ships, fleet_index)
 
@@ -234,14 +234,14 @@ class Tick():
 
 class Player(GameObject):
     def __init__(self, name=None,
-            elements=None, ships=None, workforce=12,
+            allotropes=None, ships=None, workforce=12,
             planetary=None, active=True):
 
         if not name:
             raise PlayersException("Needs name")
 
         self.name = name
-        self.elements = elements
+        self.allotropes = allotropes
         self.ships = ships
         self.workforce = workforce
         self.planetary = planetary
@@ -275,16 +275,16 @@ class Player(GameObject):
 
         self.data_invariant()
 
-    def get_elements(self):
-        return self.elements
+    def get_allotropes(self):
+        return self.allotropes
 
     def get_ships(self):
         return self.ships
 
-    def set_elements(self, elements):
+    def set_allotropes(self, allotropes):
         self.data_invariant()
 
-        self.elements = elements
+        self.allotropes = allotropes
 
         self.data_invariant()
 
@@ -307,7 +307,7 @@ class Player(GameObject):
 
         return total
 
-    def get_elements_per_tick(self):
+    def get_allotropes_per_tick(self):
         pass
 
     def tick(self):
@@ -332,11 +332,11 @@ class Player(GameObject):
         elif(self.name == ""):
             raise ValueError("Player name must be more than 0 characters: %s", str(self.name))
 
-        # elements
-        if not type(self.elements) == type(1):
-            raise ValueError("Player elements must be an int  %s" % str(self.elements))
-        elif(self.elements < 0):
-            raise ValueError("Player elements must be 0 or a posititive int  %s" % str(self.elements))
+        # allotropes
+        if not type(self.allotropes) == type(1):
+            raise ValueError("Player allotropes must be an int  %s" % str(self.allotropes))
+        elif(self.allotropes < 0):
+            raise ValueError("Player allotropes must be 0 or a posititive int  %s" % str(self.allotropes))
 
         if not type(self.ships) == type([]):
             raise ValueError("Player ships must be a list  %s" % str(self.ships))
