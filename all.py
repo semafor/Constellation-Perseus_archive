@@ -146,7 +146,17 @@ class Console(cmd.Cmd):
             print "\tShips: %d (ship points: %d)" % (len(player.get_ships()), player.get_ship_total())
 
             for n, ship in enumerate(player.get_ships()):
-                print "\t\t%i. %s (%s)" % (n, ship.get_name(), ship.get_id())
+                print "\t\t%i. %s (%s)" % (n + 1, ship.get_name(), ship.get_id())
+
+            print "\tFleets: %d" % (len(player.get_fleets()))
+
+            for n, fleet in enumerate(player.get_fleets()):
+                print "\t\tFleet #%i has %s ships." % (n + 1, len(fleet.get_ships()))
+
+                if(fleet.get_mission()):
+                    print "\t\t\tOn a mission (%s)" % fleet.get_mission().get_stage()
+                else:
+                    print "\t\t\tOn base"
 
     def do_status(self, args):
         """See st"""
@@ -214,9 +224,22 @@ class Console(cmd.Cmd):
         mission = self.game.attack(attacker, defender, fleet_index, attack_length)
 
         if mission:
-            print "Attack with plan %s" % str(mission.get_plan())
+            print "Player %s is attacking player %s. Current stage: %s" % (mission.get_player().get_name(), mission.get_target().get_name(), mission.get_stage())
         else:
             print "Failed to attack"
+
+    def do_test(self, args):
+        player_a = self.game.create(game.Player, name="a", elements=1000)
+        print "* new player %s (%s)" % (player_a.get_name(), player_a.get_id())
+
+        self.game.buy_ships(player_a, "ain", 4)
+        print "* new player %s %d ships of type %s" % (player_a.get_name(), 4, "ain")
+
+        player_b = self.game.create(game.Player, name="b", elements=1000)
+        print "* new player %s (%s)" % (player_b.get_name(), player_b.get_id())
+
+        self.game.buy_ships(player_b, "beid", 3)
+        print "* new player %s %d ships of type %s" % (player_b.get_name(), 4, "beid")
 
     ## The end of game commands
     #
