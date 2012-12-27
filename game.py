@@ -135,6 +135,9 @@ class Game():
             raise GameException("Attacking player have no ships in fleet %d" % fleet_index)
             return False
 
+        if(attacking_player == defending_player):
+            raise GameException("A player cannot attack self")
+
         #player, target, mission_type, target_stay):
         fleet = attacking_player.get_fleet(fleet_index)
         m = mission.Mission(attacking_player, defending_player, mission.ATTACK, target_stay)

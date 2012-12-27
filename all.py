@@ -185,19 +185,14 @@ class Console(cmd.Cmd):
 
             # target
             try:
-                target_search = args[2]
+                target = self.normalize_query(args[2])[0]
             except:
-                print usage_attack
-                return
-
-            target = self.normalize_query(target_search)[0]
-
-            if not target:
-                print "Error: cannot find player %s" % target_search
+                print "Error: cannot find player %s" % args[2]
                 return
 
             if(player == target):
                 print "Error: cannot attack self"
+                return
 
             # fleet
             try:
