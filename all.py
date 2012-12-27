@@ -142,21 +142,105 @@ class Console(cmd.Cmd):
 
         for player in players:
             print "Status for player \"%s\":" % player.get_name()
-            print "\tElements: %d" % player.get_allotropes()
-            print "\tShips: %d (ship points: %d)" % (len(player.get_ships()), player.get_ship_total())
+            print "\n\tAllotropes: %d" % player.get_allotropes()
+            print "\n\tShips: %d (ship points: %d)" % (len(player.get_ships()), player.get_ship_total())
 
             for n, ship in enumerate(player.get_ships()):
-                print "\t\t%i. %s (%s)" % (n + 1, ship.get_name(), ship.get_id())
+                print "\t\t%d. %s (%s)" % (n + 1, ship.get_name(), ship.get_id())
 
-            print "\tFleets: %d" % (len(player.get_fleets()))
+            print "\n\tFleets: %d" % (len(player.get_fleets()))
 
             for n, fleet in enumerate(player.get_fleets()):
-                print "\t\tFleet #%i has %s ships." % (n + 1, len(fleet.get_ships()))
+                print "\t\tFleet #%d" % (n + 1)
 
                 if(fleet.get_mission()):
-                    print "\t\t\tOn a mission (%s)" % fleet.get_mission().get_stage()
+                    print "\t\t\t%d ships on a mission (%s)" % (len(fleet.get_ships()), fleet.get_mission().get_stage())
                 else:
-                    print "\t\t\tOn base"
+                    print "\t\t\t%d ships on base" % len(fleet.get_ships())
+
+    def do_player(self, args):
+        args = shlex.split(args)
+        usage = "usage: <player_id|player_name> <status|attack|abort|buy>"
+        usage_attack = "usage attack: <player_id|player_name> attack <player_id|player_name> <fleet_index>"
+        usage_abort = "usage abort: <player_id|player_name> abort <fleet_index>"
+        usage_buy = "usage buy: <player_id|player_name> buy <amount> <ship_enum(ain|beid) [fleet_index]"
+
+        try:
+            player = self.normalize_query(args[0])[0]
+        except:
+            print "Error: cannot find player %s" % args[0]
+            return
+
+        try:
+            action = args[1]
+        except:
+            print usage
+            return
+
+        if(action == "status" or action == "st"):
+            self.do_player_status(player.get_id())
+            return
+
+        if(action == "attack"):
+
+            # target
+            try:
+                target_search = args[2]
+            except:
+                print usage_attack
+                return
+
+            target = self.normalize_query(target_search)[0]
+
+            if not target:
+                print "Error: cannot find player %s" % target_search
+                return
+
+            if(player == target):
+                print "Error: cannot attack self"
+
+            # fleet
+            try:
+                fleet_index = int(args[3])
+            except:
+                print usage_attack
+                return
+
+            mission = self.game.attack(player, target, fleet_index, 3)
+
+            if mission:
+                print "Player %s is attacking player %s. Current stage: %s" % (mission.get_player().get_name(), mission.get_target().get_name(), mission.get_stage())
+            else:
+                print "Failed to attack"
+
+        elif(action == "buy"):
+
+            # amount
+            try:
+                amount = int(args[2])
+            except:
+                print usage_buy
+                return
+
+            # ship
+            try:
+                ship_enum = args[3]
+            except:
+                print usage_buy
+                return
+
+            # fleet_index
+            try:
+                fleet_index = int(args[4])
+            except:
+                fleet_index = 0
+
+            result = self.game.buy_ships(player, ship_enum, amount, fleet_index)
+
+            if(result):
+                print "Bought %d ships of type %s for player %s (%s)" % (amount, ship_enum, player.get_name(), player.get_id())
+            else:
+                print "Failed to buy ships."
 
     def do_status(self, args):
         """See st"""
