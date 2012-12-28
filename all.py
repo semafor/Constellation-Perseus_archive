@@ -26,7 +26,6 @@ class Console(cmd.Cmd):
 
         try:
             by_id = self.game.get_by_id(query)
-            print by_id
         except:
             by_id = None
 
@@ -160,21 +159,27 @@ class Console(cmd.Cmd):
 
     def do_player(self, args):
         args = shlex.split(args)
-        usage = "usage: <player_id|player_name> <status|attack|abort|buy>"
-        usage_attack = "usage attack: <player_id|player_name> attack <player_id|player_name> <fleet_index>"
-        usage_abort = "usage abort: <player_id|player_name> abort <fleet_index>"
-        usage_buy = "usage buy: <player_id|player_name> buy <amount> <ship_enum(ain|beid) [fleet_index]"
+        usage = "usage: <player_id|player_name> <status(st)|attack|abort|buy>"
+        usage_player = "usage: <status(st)|attack|abort|buy>"
+        usage_attack = "usage attack: <player_id|player_name> <fleet_index>"
+        usage_attack_fleet_index = "usage attack player: <fleet_index>"
+        usage_abort = "usage abort: <fleet_index>"
+        usage_buy = "usage buy: <amount> <ship_enum(ain|beid) [fleet_index]"
+
+        if not args:
+            print usage
+            return
 
         try:
             player = self.normalize_query(args[0])[0]
         except:
-            print "Error: cannot find player %s" % args[0]
+            print "Error: cannot find player %s" % str(args[0])
             return
 
         try:
             action = args[1]
         except:
-            print usage
+            print usage_player
             return
 
         if(action == "status" or action == "st"):
@@ -183,11 +188,25 @@ class Console(cmd.Cmd):
 
         if(action == "attack"):
 
+            try:
+                args[2]
+            except:
+                print "Error: missing target"
+                print usage_attack
+                return
+
+            try:
+                args[3]
+            except:
+                print "Error: missing fleet_index"
+                print usage_attack_fleet_index
+                return
+
             # target
             try:
                 target = self.normalize_query(args[2])[0]
             except:
-                print "Error: cannot find player %s" % args[2]
+                print "Error: cannot find player %s" % str(args[2])
                 return
 
             if(player == target):
@@ -198,15 +217,22 @@ class Console(cmd.Cmd):
             try:
                 fleet_index = int(args[3])
             except:
+                print "Error: could not convert fleet index %s to int " % str(args[3])
+                return
+
+            try:
+                mission = self.game.attack(player, target, fleet_index, 3)
+            except game.GameException as e:
+                print "Failed to attack: %s" % e
+                return
+            except Exception as e:
+                print "Unknown failure: %s" % e
                 print usage_attack
                 return
 
-            mission = self.game.attack(player, target, fleet_index, 3)
-
-            if mission:
+            if(mission):
                 print "Player %s is attacking player %s. Current stage: %s" % (mission.get_player().get_name(), mission.get_target().get_name(), mission.get_stage())
-            else:
-                print "Failed to attack"
+                return
 
         elif(action == "buy"):
 
@@ -230,7 +256,14 @@ class Console(cmd.Cmd):
             except:
                 fleet_index = 0
 
-            result = self.game.buy_ships(player, ship_enum, amount, fleet_index)
+            try:
+                result = self.game.buy_ships(player, ship_enum, amount, fleet_index)
+            except game.GameException as e:
+                print "Failed to buy: %s" % e
+                return
+            except:
+                print usage_buy
+                return
 
             if(result):
                 print "Bought %d ships of type %s for player %s (%s)" % (amount, ship_enum, player.get_name(), player.get_id())
@@ -308,17 +341,19 @@ class Console(cmd.Cmd):
             print "Failed to attack"
 
     def do_test(self, args):
-        player_a = self.game.create(game.Player, name="a", allotropes=1000)
+        player_a = self.game.create_player(name="a", allotropes=1000)
         print "* new player %s (%s)" % (player_a.get_name(), player_a.get_id())
 
         self.game.buy_ships(player_a, "ain", 4)
         print "* new player %s %d ships of type %s" % (player_a.get_name(), 4, "ain")
 
-        player_b = self.game.create(game.Player, name="b", allotropes=1000)
+        player_b = self.game.create_player(name="b", allotropes=1000)
         print "* new player %s (%s)" % (player_b.get_name(), player_b.get_id())
 
         self.game.buy_ships(player_b, "beid", 3)
         print "* new player %s %d ships of type %s" % (player_b.get_name(), 4, "beid")
+
+        self.do_player("a attack b 0")
 
     ## The end of game commands
     #
@@ -367,11 +402,11 @@ class Console(cmd.Cmd):
         #
         self.game = game.Game()
 
-        player = self.game.create(game.Player, name="Dummy Player", allotropes=10000)
+        player = self.game.create_player(name="Dummy Player", allotropes=10000)
         print "* new player %s (%s)" % (player.get_name(), player.get_id())
 
-        planetary = self.game.create(game.Planetary, name="Dummy Planetary")
-        print "* new planetary %s (%s)" % (planetary.get_name(), planetary.get_id())
+        #planetary = self.game.create(game.Planetary, name="Dummy Planetary")
+        #print "* new planetary %s (%s)" % (planetary.get_name(), planetary.get_id())
 
         #owned_planetary = self.game.create(game.Planetary, name="Owned Planetary")
         #self.game.get_by_id(owned_planetary).set_owner(player)

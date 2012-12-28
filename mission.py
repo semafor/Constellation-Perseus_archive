@@ -1,14 +1,18 @@
 DEFAULT_TRAVEL_TIME = 2
 
+PREPARATIONS = "preparations"
 ENROUTE = "enroute"
+RETURN = "return"
+
 ATTACK = "attack"
 DEFENCE = "defence"
+
 COMPETED = "completed"
-RETURN = "return"
+ABORTED = "aborted"
 
 
 class Mission():
-    def __init__(self, player, target, mission_type, stay_time):
+    def __init__(self, player, target, mission_type, stay_time, fleet):
 
         try:
             player.get_planetary()
@@ -28,8 +32,16 @@ class Mission():
             raise ValueError("need to %s n ticks, not %s"\
                 % (mission_type, str(stay_time)))
 
+        try:
+            fleet.get_mission()
+        except:
+            raise ValueError("Bad given fleet: %s"\
+                % str(fleet))
+
         self.player = player
+        self.fleet = fleet
         self.target = target
+
         self.travel_time = player.get_travel_time()
         self.stay_time = stay_time
         self.mission_type = mission_type
@@ -38,36 +50,70 @@ class Mission():
 
         self.stay_tick = 0
 
-        self.stage = ENROUTE
+        self.stage = PREPARATIONS
 
-        self.data_invariant()
+        self._data_invariant()
 
     def tick(self):
-        self.data_invariant()
+        self._data_invariant()
 
-        if(self.stage == ENROUTE):
+        # preparations/enroute
+        if(self.stage == PREPARATIONS or self.stage == ENROUTE):
             self.towards_destination()
+
+        # attack/defence
         elif(self.stage == ATTACK or self.stage == DEFENCE):
             self.at_destination()
+
+        # return
         elif(self.stage == RETURN):
             self.towards_base()
+
+        # completed (unecessary?)
         elif(self.stage == COMPETED):
             self.completed()
 
         self.post_tick_stage_update()
 
-        self.data_invariant()
+        self._data_invariant()
 
     def towards_destination(self):
+        self._data_invariant()
+
         self.travel_tick = self.travel_tick + 1
 
+        self._data_invariant()
+
     def towards_base(self):
+        self._data_invariant()
+
         self.travel_tick = self.travel_tick - 1
 
+        self._data_invariant()
+
     def at_destination(self):
+        self._data_invariant()
+
+        if(self.stage == ATTACK):
+            self.target.get_planetary().register_hostile_fleet(self.fleet)
+        elif(self.stage == DEFENCE):
+            self.target.get_planetary().register_friendly_fleet(self.fleet)
+
         self.stay_tick = self.stay_tick + 1
 
+        if(self.mission_type == ATTACK):
+            self.attack()
+        elif(self.mission_type == DEFENCE):
+            self.defence()
+        else:
+            raise MissionException("at_destination in unknown state %s"\
+                % str(self.mission_type))
+
+        self._data_invariant()
+
     def post_tick_stage_update(self):
+        self._data_invariant()
+
         if(self.travel_tick == self.travel_time):
             self.stage = self.mission_type
 
@@ -83,20 +129,29 @@ class Mission():
         if(self.stage == DEFENCE):
             self.defence()
 
+        self._data_invariant()
+
     def attack(self):
+
         pass
 
     def defence(self):
         pass
 
     def abort(self):
+        self._data_invariant()
+
         if(self.travel_tick > 0):
             self.stage = RETURN
         else:
             self.stage = COMPETED
 
+        self._data_invariant()
+
     def completed(self):
+        self._data_invariant()
         pass
+        self._data_invariant()
 
     def get_player(self):
         return self.player
@@ -116,17 +171,19 @@ class Mission():
     def get_stage(self):
         return self.stage
 
-    def data_invariant(self):
+    def _data_invariant(self):
         # stage
         if not type(self.stage) == type(""):
             raise ValueError("Stage is not a a str: " % str(self.stage))
         elif(self.stage == ""):
             raise ValueError("Stage is an empty string: %s", str(self.stage))
         elif(self.stage != RETURN and self.stage != COMPETED and\
-            self.stage != ENROUTE and self.stage != ATTACK\
-            and self.stage != DEFENCE):
+            self.stage != ENROUTE and self.stage != ATTACK and\
+            self.stage != ABORTED\
+            and self.stage != DEFENCE and self.stage != PREPARATIONS):
             raise ValueError("Stage is not %s, but: %s" \
-                % (str([ENROUTE, RETURN, COMPETED, ATTACK, DEFENCE]),\
+                % (str([PREPARATIONS, ENROUTE, RETURN,\
+                    COMPETED, ATTACK, DEFENCE]),\
                     str(self.stage)))
 
         # mission type
@@ -145,11 +202,16 @@ class Mission():
             raise MissionException("Current tick is larger than scheduled\
                 travel time: %s" % str(self.travel_tick))
 
-        # player, target
+        # player, fleet, target
         try:
             self.player.get_planetary()
         except:
             raise ValueError("Player is not a Player: %s" % str(self.player))
+
+        try:
+            self.fleet.get_mission()
+        except:
+            raise ValueError("Bad fleet: %s" % str(self.flet))
 
         try:
             self.target.get_planetary()
