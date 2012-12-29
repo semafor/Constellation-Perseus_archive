@@ -246,20 +246,20 @@ TYPES = {
         "name": "Ain",
         "ship_class": 1,
         "price": 100,
-        "hull": 100,
+        "hull": 5,
         "guns": 5,
         "gun_warmup": 2,
-        "shields": 10,
+        "shields": 2,
         "shields_restore_time": 2
     },
     "beid": {
         "name": "Beid",
         "ship_class": 1,
         "price": 250,
-        "hull": 200,
+        "hull": 10,
         "guns": 15,
         "gun_warmup": 3,
-        "shields": 20,
+        "shields": 15,
         "shields_restore_time": 3
     }
 }
