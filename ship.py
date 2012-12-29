@@ -246,11 +246,11 @@ TYPES = {
         "name": "Ain",
         "ship_class": 1,
         "price": 100,
-        "hull": 5,
-        "guns": 5,
+        "hull": 30,
+        "guns": 10,
         "gun_warmup": 2,
-        "shields": 2,
-        "shields_restore_time": 2
+        "shields": 100,
+        "shields_restore_time": 1
     },
     "beid": {
         "name": "Beid",

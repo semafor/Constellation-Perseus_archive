@@ -34,11 +34,18 @@ class Attack():
             for ship in self.get_all_ships_from_fleets(self.all_fleets):
                 ship.attack_tick()
 
-            # defenders shooting first
-            self.fleets_attack_fleets(self.defending_fleets,\
-                self.attacking_fleets)
-            self.fleets_attack_fleets(self.attacking_fleets,\
-                self.defending_fleets)
+            if(n % 2 == 0):
+                # defenders shooting first
+                self.fleets_attack_fleets(self.defending_fleets,\
+                    self.attacking_fleets)
+                self.fleets_attack_fleets(self.attacking_fleets,\
+                    self.defending_fleets)
+            else:
+                # attackers shooting first
+                self.fleets_attack_fleets(self.attacking_fleets,\
+                    self.defending_fleets)
+                self.fleets_attack_fleets(self.defending_fleets,\
+                    self.attacking_fleets)
 
         self.complete()
 
@@ -62,6 +69,17 @@ class Attack():
             for ship in fleet.get_ships():
                 ships.append(ship)
                 ship._fleet = fleet
+
+                destroyed = False
+                try:
+                    destroyed = ship._destroyed
+                except:
+                    pass
+
+                if(destroyed):
+                    raise AttackException("Ship %s is destroyed,\
+                        but still in fleet %s"\
+                        % (str(ship), str(fleet)))
 
         return ships
 

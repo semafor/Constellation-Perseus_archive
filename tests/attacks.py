@@ -27,9 +27,12 @@ class TestAinVsAin(unittest.TestCase):
 
     def test_ain_vs_ain(self):
         """Attacking ain dies"""
-        attack.Attack([self.one_ain], [self.one_ain_2])
-        self.assertEqual(len(self.one_ain.get_ships()), 0)
-        self.assertEqual(len(self.one_ain_2.get_ships()), 1)
+        ain_a = self._build_fleet("ain", 1)
+        ain_b = self._build_fleet("ain", 1)
+
+        attack.Attack([ain_a], [ain_b])
+        self.assertEqual(len(ain_a.get_ships()), 0)
+        self.assertEqual(len(ain_b.get_ships()), 1)
 
     def test_beid_vs_beid(self):
         """No beid dies, both live"""
@@ -44,13 +47,13 @@ class TestAinVsAin(unittest.TestCase):
         self.assertEqual(len(self.one_ain.get_ships()), 0)
 
     def test_two_attacking_ain_vs_single_ain(self):
-        """The single ain dies, two ain lives"""
+        """The single ain dies, one ain lives"""
         attack.Attack([self.two_ain], [self.one_ain])
 
         self.assertEqual(len(self.one_ain.get_ships()), 0)
 
         attacking_fleet_ships = self.two_ain.get_ships()
-        self.assertEqual(len(attacking_fleet_ships), 2)
+        self.assertEqual(len(attacking_fleet_ships), 1)
 
     def test_two_attacking_beid_vs_single_beid(self):
         """The single beid dies, two beid lives"""
@@ -68,7 +71,8 @@ class TestAinVsAin(unittest.TestCase):
 
         attack.Attack([two_hundred_ain], [hundred_ain])
 
-        print "\nOriginally 200 ain, there now are %d left" % len(two_hundred_ain.get_ships())
+        print "\n200 ain vs 100 ain:"
+        print "Originally 200 ain, there now are %d left" % len(two_hundred_ain.get_ships())
         print "Originally 100 ain, there now are %d left" % len(hundred_ain.get_ships())
 
     def test_2000_ain_vs_1000_ain(self):
@@ -78,7 +82,8 @@ class TestAinVsAin(unittest.TestCase):
 
         attack.Attack([two_thousand_ain], [thousand_ain])
 
-        print "\nOriginally 2000 ain, there now are %d left" % len(two_thousand_ain.get_ships())
+        print "\n2000 ain vs 1000 ain:"
+        print "Originally 2000 ain, there now are %d left" % len(two_thousand_ain.get_ships())
         print "Originally 1000 ain, there now are %d left" % len(thousand_ain.get_ships())
 
     def test_1000_ain_vs_2000_ain(self):
@@ -88,8 +93,20 @@ class TestAinVsAin(unittest.TestCase):
 
         attack.Attack([thousand_ain], [two_thousand_ain])
 
-        print "\nOriginally 1000 ain, there now are %d left" % len(thousand_ain.get_ships())
+        print "\n1000 ain vs 2000 ain:"
+        print "Originally 1000 ain, there now are %d left" % len(thousand_ain.get_ships())
         print "Originally 2000 ain, there now are %d left" % len(two_thousand_ain.get_ships())
+
+    # def test_20000_ain_vs_10000_ain(self):
+    #     """Something"""
+    #     two_thousand_ain = self._build_fleet("ain", 20000)
+    #     thousand_ain = self._build_fleet("ain", 10000)
+
+    #     attack.Attack([thousand_ain], [two_thousand_ain])
+
+    #     print "\n20000 ain vs 10000 ain:"
+    #     print "Originally 10000 ain, there now are %d left" % len(thousand_ain.get_ships())
+    #     print "Originally 20000 ain, there now are %d left" % len(two_thousand_ain.get_ships())
 
 if __name__ == '__main__':
     unittest.main()
