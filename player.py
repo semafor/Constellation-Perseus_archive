@@ -47,16 +47,42 @@ class Player(gameobject.GameObject):
 
         self.data_invariant()
 
-    def get_allotropes(self):
-        return self.allotropes
-
     def get_ships(self):
         return self.ships
+
+    def get_allotropes(self):
+        return self.allotropes
 
     def set_allotropes(self, allotropes):
         self.data_invariant()
 
         self.allotropes = allotropes
+
+        self.data_invariant()
+
+    def add_allotropes(self, amount):
+        self.data_invariant()
+
+        if(amount < 0):
+            amount = 0
+
+        self.set_allotropes(self.get_allotropes() + amount)
+
+        self.data_invariant()
+
+    def remove_allotropes(self, amount):
+        self.data_invariant()
+
+        current_amount = self.get_allotropes()
+        diff = current_amount - amount
+
+        if(amount < 0):
+            amount = 0
+
+        if(diff < 0):
+            amount = current_amount
+
+        self.set_allotropes(self.get_allotropes() - amount)
 
         self.data_invariant()
 

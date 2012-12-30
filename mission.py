@@ -5,14 +5,14 @@ ENROUTE = "enroute"
 RETURN = "return"
 
 ATTACK = "attack"
-DEFENCE = "defence"
+DEFEND = "defend"
 
 COMPETED = "completed"
 ABORTED = "aborted"
 
 
 class Mission():
-    def __init__(self, player, target, mission_type, stay_time, fleet):
+    def __init__(self, mission_type, player, target, stay_time, fleet):
 
         try:
             player.get_planetary()
@@ -24,9 +24,9 @@ class Mission():
         except:
             raise ValueError("Target needs to be Player, not %s" % str(target))
 
-        if not mission_type == ATTACK or mission_type == DEFENCE:
+        if(mission_type != ATTACK) and (mission_type != DEFEND):
             raise ValueError("mission_type needs to be %s or %s, not %s"\
-                % (ATTACK, DEFENCE, str(mission_type)))
+                % (ATTACK, DEFEND, mission_type))
 
         if not stay_time:
             raise ValueError("need to %s n ticks, not %s"\
@@ -65,7 +65,7 @@ class Mission():
             self.towards_destination()
 
         # attack/defence
-        elif(self.stage == ATTACK or self.stage == DEFENCE):
+        elif(self.stage == ATTACK or self.stage == DEFEND):
             self.at_destination()
 
         # return
@@ -102,14 +102,14 @@ class Mission():
             self.target.get_planetary().register_hostile_fleet(self.fleet)
 
         # register friendly fleet
-        elif(self.stage == DEFENCE):
+        elif(self.stage == DEFEND):
             self.target.get_planetary().register_friendly_fleet(self.fleet)
 
         self.stay_tick = self.stay_tick + 1
 
         if(self.mission_type == ATTACK):
             self.attack()
-        elif(self.mission_type == DEFENCE):
+        elif(self.mission_type == DEFEND):
             self.defence()
         else:
             raise MissionException("at_destination in unknown state %s"\
@@ -132,7 +132,7 @@ class Mission():
         if(self.stage == ATTACK):
             self.attack()
 
-        if(self.stage == DEFENCE):
+        if(self.stage == DEFEND):
             self.defence()
 
         self._data_invariant()
@@ -177,6 +177,9 @@ class Mission():
     def get_stage(self):
         return self.stage
 
+    def get_ticks_until_destination(self):
+        return DEFAULT_TRAVEL_TIME - self.get_travel_tick()
+
     def _data_invariant(self):
         # stage
         if not type(self.stage) == type(""):
@@ -186,16 +189,16 @@ class Mission():
         elif(self.stage != RETURN and self.stage != COMPETED and\
             self.stage != ENROUTE and self.stage != ATTACK and\
             self.stage != ABORTED\
-            and self.stage != DEFENCE and self.stage != PREPARATIONS):
+            and self.stage != DEFEND and self.stage != PREPARATIONS):
             raise ValueError("Stage is not %s, but: %s" \
                 % (str([PREPARATIONS, ENROUTE, RETURN,\
-                    COMPETED, ATTACK, DEFENCE]),\
+                    COMPETED, ATTACK, DEFEND]),\
                     str(self.stage)))
 
         # mission type
-        if(self.mission_type != ATTACK and self.mission_type != DEFENCE):
+        if(self.mission_type != ATTACK and self.mission_type != DEFEND):
             raise ValueError("Mission type is not %s or %s but: %s"\
-                % (ATTACK, DEFENCE, str(self.mission_type)))
+                % (ATTACK, DEFEND, str(self.mission_type)))
 
         # travel tick
         if not type(self.travel_tick) == type(1):

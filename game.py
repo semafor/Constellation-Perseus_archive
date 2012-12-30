@@ -136,37 +136,43 @@ class Game():
 
         return True
 
-    def attack(self, attacking_player, defending_player, fleet_index, target_stay):
+    def attack(self, *args):
+        return self.create_mission(mission.ATTACK, *args)
+
+    def defend(self, *args):
+        return self.create_mission(mission.DEFEND, *args)
+
+    def create_mission(self, modus, initiator, target, fleet_index, target_stay):
 
         try:
-            attacking_player.get_planetary()
+            initiator.get_planetary()
         except:
-            raise ValueError("Attacking player needs to be Player, not %s" % str(attacking_player))
+            raise ValueError("Initiator needs to be Player, not %s" % str(initiator))
 
         try:
-            defending_player.get_planetary()
+            target.get_planetary()
         except:
-            raise ValueError("Defending player needs to be Player, not %s" % str(defending_player))
+            raise ValueError("Target needs to be Player, not %s" % str(target))
 
         if(type(fleet_index) != type(1)):
-            raise ValueError("Attacker must specify fleet, other than %s" % str(fleet_index))
+            raise ValueError("Initiator must specify fleet, other than %s" % str(fleet_index))
 
         if(type(target_stay) != type(1)):
-            raise ValueError("Specify for how long attack will last, not %s" % str(target_stay))
+            raise ValueError("Specify for how long mission will last, not %s" % str(target_stay))
 
-        if(len(attacking_player.get_fleet(fleet_index).get_ships()) == 0):
-            raise GameException("Attacking player have no ships in fleet %d" % fleet_index)
+        if(len(initiator.get_fleet(fleet_index).get_ships()) == 0):
+            raise GameException("Initiator have no ships in fleet %d" % fleet_index)
             return False
 
-        if(attacking_player == defending_player):
-            raise GameException("A player cannot attack self")
+        if(initiator == target):
+            raise GameException("Initiator cannot target self")
 
-        fleet = attacking_player.get_fleet(fleet_index)
+        fleet = initiator.get_fleet(fleet_index)
 
         if(fleet.get_mission()):
             raise GameException("Fleet already on mission")
 
-        m = mission.Mission(attacking_player, defending_player, mission.ATTACK, target_stay, fleet)
+        m = mission.Mission(modus, initiator, target, target_stay, fleet)
         fleet.set_mission(m)
 
         return m

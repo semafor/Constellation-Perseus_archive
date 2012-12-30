@@ -140,12 +140,20 @@ class Console(cmd.Cmd):
         print "Found %d players:" % len(players)
 
         for player in players:
-            print "Status for player \"%s\":" % player.get_name()
-            print "\n\tAllotropes: %d" % player.get_allotropes()
-            print "\n\tShips: %d (ship points: %d)" % (len(player.get_ships()), player.get_ship_total())
+
+            ships_of_type = {}
+            ships_of_type["ain"] = 0
+            ships_of_type["beid"] = 0
 
             for n, ship in enumerate(player.get_ships()):
-                print "\t\t%d. %s (%s)" % (n + 1, ship.get_name(), ship.get_id())
+                t = ship.get_name().lower()
+                ships_of_type[t] = ships_of_type[t] + 1
+
+            print "Status for player \"%s\":" % player.get_name()
+            print "\n\tAllotropes: %d" % player.get_allotropes()
+            print "\n\tShips: %d " % len(player.get_ships())
+            print "\n\t\tTypes: %s " % str(ships_of_type)
+            print "\n\t\tPoints: %d " % player.get_ship_total()
 
             print "\n\tFleets: %d" % (len(player.get_fleets()))
 
@@ -154,6 +162,8 @@ class Console(cmd.Cmd):
 
                 if(fleet.get_mission()):
                     print "\t\t\t%d ships on a mission (%s)" % (len(fleet.get_ships()), fleet.get_mission().get_stage())
+                    print "\t\t\t\t%sing %s in %d ticks"\
+                        % (fleet.get_mission().get_mission_type(), fleet.get_mission().get_target().get_name(), fleet.get_mission().get_ticks_until_destination())
                 else:
                     print "\t\t\t%d ships on base" % len(fleet.get_ships())
 
@@ -161,10 +171,80 @@ class Console(cmd.Cmd):
         args = shlex.split(args)
         usage = "usage: <player_id|player_name> <status(st)|attack|abort|buy>"
         usage_player = "usage: <status(st)|attack|abort|buy>"
+
         usage_attack = "usage attack: <player_id|player_name> <fleet_index>"
         usage_attack_fleet_index = "usage attack player: <fleet_index>"
+
+        usage_defend = "usage defend: <player_id|player_name> <fleet_index>"
+        usage_defend_fleet_index = "usage defend player: <fleet_index>"
+
         usage_abort = "usage abort: <fleet_index>"
+
         usage_buy = "usage buy: <amount> <ship_enum(ain|beid) [fleet_index]"
+        usage_allotropes = "usage add|remove: <amount>"
+
+        def _new_mission(self, args, mode):
+
+            if not mode:
+                raise ValueError("_new_mission missing mode")
+
+            if(mode == "attack"):
+                _usage = usage_attack
+                _usage_fleet = usage_attack_fleet_index
+            elif(mode == "defend"):
+                _usage = usage_defend
+                _usage_fleet = usage_defend_fleet_index
+
+            try:
+                args[2]
+            except:
+                print "Error: missing target"
+                print _usage
+                return
+
+            try:
+                args[3]
+            except:
+                print "Error: missing fleet_index"
+                print _usage_fleet
+                return
+
+            # target
+            try:
+                target = self.normalize_query(args[2])[0]
+            except:
+                print "Error: cannot find player %s" % str(args[2])
+                return
+
+            if(player == target):
+                print "Error: cannot %s self" % mode
+                return
+
+            # fleet
+            try:
+                fleet_index = int(args[3])
+            except:
+                print "Error: could not convert fleet index %s to int " % str(args[3])
+                return
+
+            try:
+                if(mode == "attack"):
+                    mission = self.game.attack(player, target, fleet_index, 3)
+                elif(mode == "defend"):
+                    mission = self.game.defend(player, target, fleet_index, 3)
+
+            except game.GameException as e:
+                print "Failed to attack: %s" % e
+                return
+            except Exception as e:
+                print "Unknown failure: %s" % e
+                print _usage
+                return
+
+            if(mission):
+                print "Player %s is %sing player %s. Current stage: %s"\
+                    % (mission.get_player().get_name(), mode, mission.get_target().get_name(), mission.get_stage())
+                return
 
         if not args:
             print usage
@@ -196,53 +276,24 @@ class Console(cmd.Cmd):
             self.do_player_status(player.get_id())
             return
 
-        if(action == "attack"):
-
+        if(action == "add" or action == "remove"):
             try:
                 args[2]
             except:
-                print "Error: missing target"
-                print usage_attack
+                print "Error: missing how many allotropes to add/remove"
+                print usage_allotropes
                 return
 
-            try:
-                args[3]
-            except:
-                print "Error: missing fleet_index"
-                print usage_attack_fleet_index
-                return
+            if(action == "add"):
+                player.add_allotropes(int(args[2]))
+            elif(action == "remove"):
+                player.remove_allotropes(int(args[2]))
 
-            # target
-            try:
-                target = self.normalize_query(args[2])[0]
-            except:
-                print "Error: cannot find player %s" % str(args[2])
-                return
+        if(action == "attack"):
+            _new_mission(self, args, action)
 
-            if(player == target):
-                print "Error: cannot attack self"
-                return
-
-            # fleet
-            try:
-                fleet_index = int(args[3])
-            except:
-                print "Error: could not convert fleet index %s to int " % str(args[3])
-                return
-
-            try:
-                mission = self.game.attack(player, target, fleet_index, 3)
-            except game.GameException as e:
-                print "Failed to attack: %s" % e
-                return
-            except Exception as e:
-                print "Unknown failure: %s" % e
-                print usage_attack
-                return
-
-            if(mission):
-                print "Player %s is attacking player %s. Current stage: %s" % (mission.get_player().get_name(), mission.get_target().get_name(), mission.get_stage())
-                return
+        if(action == "defend"):
+            _new_mission(self, args, action)
 
         elif(action == "buy"):
 
@@ -351,11 +402,14 @@ class Console(cmd.Cmd):
             print "Failed to attack"
 
     def do_test(self, args):
-        player_a = self.game.create_player(name="a", allotropes=1000)
+        player_a = self.game.create_player(name="a", allotropes=1000000)
         print "* new player %s (%s)" % (player_a.get_name(), player_a.get_id())
 
-        self.game.buy_ships(player_a, "ain", 4)
-        print "* new player %s %d ships of type %s" % (player_a.get_name(), 4, "ain")
+        self.game.buy_ships(player_a, "ain", 100)
+        print "* new player %s %d ships of type %s" % (player_a.get_name(), 100, "ain")
+
+        self.game.buy_ships(player_a, "beid", 100, 1)
+        print "* player %s bougth %d ships of type %s" % (player_a.get_name(), 100, "beid")
 
         player_b = self.game.create_player(name="b", allotropes=1000)
         print "* new player %s (%s)" % (player_b.get_name(), player_b.get_id())
@@ -363,7 +417,7 @@ class Console(cmd.Cmd):
         self.game.buy_ships(player_b, "beid", 3)
         print "* new player %s %d ships of type %s" % (player_b.get_name(), 4, "beid")
 
-        self.do_player("a attack b 0")
+        self.do_player("a defend b 0")
 
     ## The end of game commands
     #
