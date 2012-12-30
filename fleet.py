@@ -43,6 +43,10 @@ class Fleet():
     def get_mission(self):
         return self.mission
 
+    def abort_mission(self):
+        if(self.get_mission()):
+            self.get_mission().abort()
+
     def get_ships(self):
         return self.ships
 

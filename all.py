@@ -182,6 +182,16 @@ class Console(cmd.Cmd):
             print usage_player
             return
 
+        if(action == "abort"):
+            try:
+                args[2]
+            except:
+                print "Error: missing fleet_index"
+                print usage_abort
+                return
+
+            player.get_fleet(int(args[2])).abort_mission()
+
         if(action == "status" or action == "st"):
             self.do_player_status(player.get_id())
             return

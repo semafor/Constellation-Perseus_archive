@@ -1,4 +1,4 @@
-DEFAULT_TRAVEL_TIME = 2
+DEFAULT_TRAVEL_TIME = 3
 
 PREPARATIONS = "preparations"
 ENROUTE = "enroute"
@@ -57,8 +57,11 @@ class Mission():
     def tick(self):
         self._data_invariant()
 
+        if(self.stage == PREPARATIONS):
+            self.stage = ENROUTE
+
         # preparations/enroute
-        if(self.stage == PREPARATIONS or self.stage == ENROUTE):
+        if(self.stage == ENROUTE):
             self.towards_destination()
 
         # attack/defence
@@ -94,8 +97,11 @@ class Mission():
     def at_destination(self):
         self._data_invariant()
 
+        # register hostile fleet
         if(self.stage == ATTACK):
             self.target.get_planetary().register_hostile_fleet(self.fleet)
+
+        # register friendly fleet
         elif(self.stage == DEFENCE):
             self.target.get_planetary().register_friendly_fleet(self.fleet)
 
@@ -121,7 +127,7 @@ class Mission():
             self.stage = RETURN
 
         if(self.travel_tick == 0):
-            self.stage = COMPETED
+            self.completed()
 
         if(self.stage == ATTACK):
             self.attack()
@@ -144,13 +150,13 @@ class Mission():
         if(self.travel_tick > 0):
             self.stage = RETURN
         else:
-            self.stage = COMPETED
+            self.completed()
 
         self._data_invariant()
 
     def completed(self):
         self._data_invariant()
-        pass
+        self.fleet.set_mission(None)
         self._data_invariant()
 
     def get_player(self):
