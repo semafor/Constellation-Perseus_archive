@@ -29,6 +29,15 @@ class Ship(gameobject.GameObject):
         self.shields_restore_time = shields_restore_time
         self.current_shields_health = shields
 
+        # data
+        self.data = {
+            "guns_shots": 0,
+            "guns_missed_shots": 0,
+            "battle_waves": 0,
+            "shields_hits": 0,
+            "hull_hits": 0,
+        }
+
         if ship_class == 0 or ship_class > len(CLASSES):
             raise ShipException("ship_class %s is N/A " % str(ship_class))
 
@@ -98,15 +107,26 @@ class Ship(gameobject.GameObject):
         self.set_shields_health(self.get_shields())
 
     def shields_hit(self):
+        """Take a shield hit or hull hit if shields are down.
+
+        Return True if shields took hit, False if hull took hit
+        """
         self.data_invariant()
+
+        successful_absorb = True
 
         if(self.get_shields_health() > 0):
             self.set_shields_health(self.get_shields_health() - 1)
 
         if(self.get_shields_health() == 0):
             self.hull_hit()
+            successful_absorb = False
+
+        self.data["shields_hits"] = self.data["shields_hits"] + 1
 
         self.data_invariant()
+
+        return successful_absorb
 
     def shields_restore(self):
         self.data_invariant()
@@ -114,12 +134,13 @@ class Ship(gameobject.GameObject):
         tickly_restore_value =\
             int(floor(self.shields / self.shields_restore_time))
 
-        if((tickly_restore_value + self.current_shields_health)\
+        if((tickly_restore_value + self.get_shields_health())\
             > self.shields):
-            self.current_shields_health = self.shields
+            # set to orignal value
+            self.set_shields_health(self.get_shields())
         else:
-            self.current_shields_health = self.current_shields_health\
-            + tickly_restore_value
+            self.set_shields_health(self.get_shields_health()\
+                + tickly_restore_value)
 
         self.data_invariant()
 
@@ -144,6 +165,8 @@ class Ship(gameobject.GameObject):
 
         if(self.get_hull > 0):
             self.set_hull(self.get_hull() - 1)
+
+        self.data["hull_hits"] = self.data["hull_hits"] + 1
 
         self.data_invariant()
 
@@ -172,12 +195,15 @@ class Ship(gameobject.GameObject):
     def guns_fire(self):
         self.data_invariant()
 
+        self.data["guns_shots"] = self.data["guns_shots"] + 1
         self.set_gun_warmth(0)
 
         self.data_invariant()
 
     def attack_tick(self):
         self.data_invariant()
+
+        self.data["battle_waves"] = self.data["battle_waves"] + 1
 
         # gun warmup
         if(self.get_gun_warmth() < self.gun_warmup):
@@ -187,6 +213,32 @@ class Ship(gameobject.GameObject):
         self.shields_restore()
 
         self.data_invariant()
+
+    def dump_data(self):
+        return {
+            "name": str(self.name),
+            "ship_class": str(self.ship_class),
+
+            "evade": str(self.evade),
+            "hull": str(self.hull),
+            "counter_measures": str(self.counter_measures),
+            "price": str(self.price),
+
+            "guns": str(self.guns),
+            "gun_warmup": str(self.gun_warmup),
+            "current_gun_warmth": str(self.current_gun_warmth),
+
+            "shields": str(self.shields),
+            "shields_restore_time": str(self.shields_restore_time),
+            "current_shields_health": str(self.current_shields_health),
+            "attack_points": str(self.get_attack_points()),
+            "defence_points": str(self.get_defence_points()),
+            "points": str(self.get_points()),
+            "hull_intact": str(self.is_hull_intact()),
+            "class_name": str(self.get_class_name()),
+            "guns_warm": str(self.is_guns_warm()),
+            "ship_totals": self.data
+        }
 
     def data_invariant(self):
 
@@ -223,6 +275,8 @@ class Ship(gameobject.GameObject):
         if(self.gun_warmup < self.current_gun_warmth):
             raise ValueError("Current gun warmth %s warmer than warm"\
                 % str(self.current_gun_warmth))
+        if(self.gun_warmup % 2 != 0):
+            raise ValueError("Gun warmup needs to be an even int")
 
         # shields
         if(type(self.shields) != type(1)):
@@ -246,20 +300,20 @@ TYPES = {
         "name": "Ain",
         "ship_class": 1,
         "price": 100,
-        "hull": 30,
-        "guns": 10,
+        "hull": 150,
+        "guns": 5,
         "gun_warmup": 2,
         "shields": 100,
-        "shields_restore_time": 1
+        "shields_restore_time": 3
     },
     "beid": {
         "name": "Beid",
         "ship_class": 1,
         "price": 250,
-        "hull": 10,
-        "guns": 15,
-        "gun_warmup": 3,
-        "shields": 15,
+        "hull": 250,
+        "guns": 10,
+        "gun_warmup": 2,
+        "shields": 300,
         "shields_restore_time": 3
     }
 }

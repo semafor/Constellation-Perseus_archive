@@ -1,5 +1,6 @@
 import gameobject
 import attack
+import force
 
 
 class Planetary(gameobject.GameObject):
@@ -45,8 +46,8 @@ class Planetary(gameobject.GameObject):
                 if not fleet.get_mission():
                     self.register_friendly_fleet(fleet)
 
-            self.current_attack = attack.Attack(self.hostile_fleets,\
-                self.friendly_fleets)
+            self.current_attack = attack.Attack(force.Force(self.hostile_fleets),\
+                force.Force(self.friendly_fleets))
 
         self.post_tick_cleanup()
 

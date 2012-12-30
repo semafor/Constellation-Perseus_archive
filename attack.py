@@ -1,109 +1,97 @@
+from random import randint
+
 ATTACK_TICKS = 10
+
+CRITICAL_HIT = 1
+NATURAL_MISFIRE = 5
 
 
 class Attack():
-    def __init__(self, attacking_fleets, defending_fleets):
+    def __init__(self, attacking_force, defending_force):
 
         self.attack_tick = 0
 
         try:
-            for fleet in attacking_fleets:
-                fleet.get_mission()
+            attacking_force.get_fleets()
         except:
-            raise AttackException("Attacking fleets not list of fleets: %s"\
-                % str(attacking_fleets))
+            raise AttackException("Attacking force not a Force: %s"\
+                % str(attacking_force))
 
         try:
-            for fleet in defending_fleets:
-                fleet.get_mission()
+            defending_force.get_fleets()
         except:
-            raise AttackException("Defending fleets not list of fleets: %s"\
-                % str(defending_fleets))
+            raise AttackException("Defending force a Force: %s"\
+                % str(defending_force))
 
-        self.remove_empty_fleets(attacking_fleets)
-        self.remove_empty_fleets(defending_fleets)
+        self.attacking_force = attacking_force
+        self.defending_force = defending_force
 
-        self.attacking_fleets = attacking_fleets
-        self.defending_fleets = defending_fleets
-
-        self.all_fleets = self.attacking_fleets + self.defending_fleets
+        self.all_ships = self.attacking_force.get_all_ships()\
+            + self.defending_force.get_all_ships()
 
         for n, tick in enumerate(range(ATTACK_TICKS)):
 
-            # run attack tick on all fleets
-            for ship in self.get_all_ships_from_fleets(self.all_fleets):
-                ship.attack_tick()
+            # defenders shooting first
+            self.force_vs_force(self.defending_force,\
+                self.attacking_force, 5)
+            self.force_vs_force(self.attacking_force,\
+                self.defending_force, 35)
 
-            if(n % 2 == 0):
-                # defenders shooting first
-                self.fleets_attack_fleets(self.defending_fleets,\
-                    self.attacking_fleets)
-                self.fleets_attack_fleets(self.attacking_fleets,\
-                    self.defending_fleets)
-            else:
-                # attackers shooting first
-                self.fleets_attack_fleets(self.attacking_fleets,\
-                    self.defending_fleets)
-                self.fleets_attack_fleets(self.defending_fleets,\
-                    self.attacking_fleets)
+            # run attack tick on all fleets
+            for ship in self.all_ships:
+                ship.attack_tick()
 
         self.complete()
 
     def complete(self):
-        for ship in self.get_all_ships_from_fleets(self.all_fleets):
+        for ship in self.all_ships:
             ship.set_gun_warmth(0)
             ship.reset_shields()
 
-    def get_fired_guns(self, fleets):
-        guns = 0
-        for ship in self.get_all_ships_from_fleets(fleets):
-            if(ship.is_guns_warm() and ship.is_hull_intact()):
-                guns = guns + ship.get_guns()
-                ship.guns_fire()
+    def force_vs_force(self, attacking_force, defending_force, miss_chance):
 
-        return guns
+        # get warmed up guns
+        attacking_force_guns = attacking_force.get_warm_guns()
 
-    def get_all_ships_from_fleets(self, fleets):
-        ships = []
-        for fleet in fleets:
-            for ship in fleet.get_ships():
-                ships.append(ship)
-                ship._fleet = fleet
+        if(attacking_force_guns):
+            for ship in defending_force.get_all_ships():
+                while(ship.is_hull_intact() and attacking_force_guns):
 
-                destroyed = False
-                try:
-                    destroyed = ship._destroyed
-                except:
-                    pass
+                    attacking_force_guns = attacking_force_guns - 1
 
-                if(destroyed):
-                    raise AttackException("Ship %s is destroyed,\
-                        but still in fleet %s"\
-                        % (str(ship), str(fleet)))
+                    # specified misfire, stop firing
+                    if(self.get_possibility(miss_chance)):
+                        continue
 
-        return ships
+                    # natural misfire, stop firing from this gun
+                    if(self.get_natural_misfire()):
+                        continue
 
-    def fleets_attack_fleets(self, attacking_fleets, defending_fleets):
+                    # hit shields, if healthy, hull if not
+                    ship.shields_hit()
 
-        attacking_fleets_guns = self.get_fired_guns(attacking_fleets)
+                    # critical hit destroys ship
+                    if(self.get_critical_hit()):
+                        ship.set_hull(0)
 
-        for ship in self.get_all_ships_from_fleets(defending_fleets):
-            while(ship.is_hull_intact() and attacking_fleets_guns):
-                ship.shields_hit()
+                # ship was destroyed, remove from fleet
+                if not ship.is_hull_intact():
+                    ship._destroyed = True
+                    ship._fleet.remove_ship(ship)
+                    continue
 
-                attacking_fleets_guns = attacking_fleets_guns - 1
+                # guns were depleted
+                if(attacking_force_guns == 0):
+                    break
 
-            if not ship.is_hull_intact():
-                ship._destroyed = True
-                ship._fleet.remove_ship(ship)
+    def get_possibility(self, percentage):
+        return randint(1, 100) <= percentage
 
-            if(attacking_fleets_guns == 0):
-                break
+    def get_critical_hit(self):
+        return randint(1, 1000) <= CRITICAL_HIT
 
-    def remove_empty_fleets(self, list_of_fleets):
-        for index, fleet in enumerate(list_of_fleets[:]):
-            if(len(fleet.get_ships()) == 0):
-                list_of_fleets.remove(fleet)
+    def get_natural_misfire(self):
+        return self.get_possibility(NATURAL_MISFIRE)
 
 
 class AttackException(Exception):
