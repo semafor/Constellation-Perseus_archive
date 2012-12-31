@@ -61,15 +61,15 @@ class Mission():
             self.stage = ENROUTE
 
         # preparations/enroute
-        if(self.stage == ENROUTE):
+        if(self.get_on_enroute()):
             self.towards_destination()
 
         # attack/defence
-        elif(self.stage == ATTACK or self.stage == DEFEND):
+        elif(self.get_at_destination()):
             self.at_destination()
 
         # return
-        elif(self.stage == RETURN):
+        elif(self.get_on_return()):
             self.towards_base()
 
         # completed (unecessary?)
@@ -177,8 +177,28 @@ class Mission():
     def get_stage(self):
         return self.stage
 
+    def get_on_enroute(self):
+        return (self.stage == ENROUTE)
+
+    def get_on_return(self):
+        return (self.stage == RETURN)
+
+    def get_at_destination(self):
+        return (self.stage == ATTACK) or (self.stage == DEFEND)
+
     def get_ticks_until_destination(self):
-        return DEFAULT_TRAVEL_TIME - self.get_travel_tick()
+        if(self.get_on_enroute()):
+            return DEFAULT_TRAVEL_TIME - self.get_travel_tick()
+        else:
+            return None
+
+    def get_ticks_until_base(self):
+        if(self.get_on_return()):
+            return self.get_travel_tick()
+        elif(self.get_at_destination()):
+            return self.get_travel_tick() + (self.stay_time - self.get_stay_tick())
+        else:
+            return None
 
     def _data_invariant(self):
         # stage

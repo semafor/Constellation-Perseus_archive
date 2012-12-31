@@ -3,6 +3,10 @@ import cmd
 import game
 import shlex
 
+import player
+import planetary
+import ship
+
 
 ## console.py
 ## Author:   James Thiele
@@ -108,11 +112,11 @@ class Console(cmd.Cmd):
         current_tick = self.game.get_current_tick()
 
         for thing in self.game.get_all_gameobjects():
-            if(isinstance(thing, game.Player)):
+            if(isinstance(thing, player.Player)):
                 total["players"] = total["players"] + 1
-            elif(isinstance(thing, game.Planetary)):
+            elif(isinstance(thing, planetary.Planetary)):
                 total["planetaries"] = total["planetaries"] + 1
-            elif(isinstance(thing, game.Ship)):
+            elif(isinstance(thing, ship.Ship)):
                 total["ships"] = total["ships"] + 1
             else:
                 print "wtf"
@@ -158,12 +162,33 @@ class Console(cmd.Cmd):
             print "\n\tFleets: %d" % (len(player.get_fleets()))
 
             for n, fleet in enumerate(player.get_fleets()):
+                mission = fleet.get_mission()
+
                 print "\t\tFleet #%d" % (n + 1)
 
-                if(fleet.get_mission()):
-                    print "\t\t\t%d ships on a mission (%s)" % (len(fleet.get_ships()), fleet.get_mission().get_stage())
-                    print "\t\t\t\t%sing %s in %d ticks"\
-                        % (fleet.get_mission().get_mission_type(), fleet.get_mission().get_target().get_name(), fleet.get_mission().get_ticks_until_destination())
+                if(mission):
+
+                    ships_of_type = {}
+                    ships_of_type["ain"] = 0
+                    ships_of_type["beid"] = 0
+
+                    for n, ship in enumerate(fleet.get_ships()):
+                        t = ship.get_name().lower()
+                        ships_of_type[t] = ships_of_type[t] + 1
+
+                    print "\t\t\t%d ships on a mission (%s)" % (len(fleet.get_ships()), mission.get_stage())
+                    print "\t\t\tInvolved ships: %s" % str(ships_of_type)
+
+                    if(mission.get_on_enroute()):
+                        print "\t\t\t\t%sing %s in %d ticks"\
+                            % (mission.get_mission_type(), mission.get_target().get_name(), mission.get_ticks_until_destination())
+                    elif(mission.get_at_destination()):
+                        print "\t\t\t\t%sing %s, attack tick %d"\
+                            % (mission.get_mission_type(), mission.get_target().get_name(), mission.get_stay_tick() + 1)
+                    elif(mission.get_on_return()):
+                        print "\t\t\t\treturning in %d ticks"\
+                            % mission.get_ticks_until_base()
+
                 else:
                     print "\t\t\t%d ships on base" % len(fleet.get_ships())
 
