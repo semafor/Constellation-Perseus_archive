@@ -21,9 +21,9 @@ class Player(gameobject.GameObject):
         self.ships = []
 
         self.fleets = [
-            fleet.Fleet(),
-            fleet.Fleet(),
-            fleet.Fleet()
+            fleet.Fleet(owner=self),
+            fleet.Fleet(owner=self),
+            fleet.Fleet(owner=self)
         ]
 
         self.fleets[0].assign_ships(self.ships)
@@ -52,6 +52,9 @@ class Player(gameobject.GameObject):
 
     def get_allotropes(self):
         return self.allotropes
+
+    def get_workforce(self):
+        return self.workforce
 
     def set_allotropes(self, allotropes):
         self.data_invariant()
@@ -95,6 +98,13 @@ class Player(gameobject.GameObject):
 
         self.data_invariant()
 
+    def remove_ship(self, ship):
+        self.data_invariant()
+
+        self.ships.remove(ship)
+
+        self.data_invariant()
+
     def get_travel_time(self):
         return DEFAULT_TRAVEL_TIME
 
@@ -106,7 +116,7 @@ class Player(gameobject.GameObject):
         return total
 
     def get_allotropes_per_tick(self):
-        pass
+        return len(self.get_ships()) + self.get_workforce() * 100
 
     def tick(self):
         self.data_invariant()
@@ -119,7 +129,7 @@ class Player(gameobject.GameObject):
                     fleet.set_mission(None)
 
             fleet.tick()
-
+        self.add_allotropes(self.get_allotropes_per_tick())
         self.data_invariant()
 
     def data_invariant(self):

@@ -411,13 +411,13 @@ class Console(cmd.Cmd):
         self.game.buy_ships(player_a, "beid", 100, 1)
         print "* player %s bougth %d ships of type %s" % (player_a.get_name(), 100, "beid")
 
-        player_b = self.game.create_player(name="b", allotropes=1000)
+        player_b = self.game.create_player(name="b", allotropes=100000)
         print "* new player %s (%s)" % (player_b.get_name(), player_b.get_id())
 
-        self.game.buy_ships(player_b, "beid", 3)
-        print "* new player %s %d ships of type %s" % (player_b.get_name(), 4, "beid")
+        self.game.buy_ships(player_b, "beid", 100)
+        print "* new player %s %d ships of type %s" % (player_b.get_name(), 100, "beid")
 
-        self.do_player("a defend b 0")
+        self.do_player("a attack b 0")
 
     ## The end of game commands
     #
@@ -466,8 +466,8 @@ class Console(cmd.Cmd):
         #
         self.game = game.Game()
 
-        player = self.game.create_player(name="Dummy Player", allotropes=10000)
-        print "* new player %s (%s)" % (player.get_name(), player.get_id())
+        #player = self.game.create_player(name="Dummy Player", allotropes=10000)
+        #print "* new player %s (%s)" % (player.get_name(), player.get_id())
 
         #planetary = self.game.create(game.Planetary, name="Dummy Planetary")
         #print "* new planetary %s (%s)" % (planetary.get_name(), planetary.get_id())
@@ -479,7 +479,7 @@ class Console(cmd.Cmd):
         #print "* new planetary %s, (%s) owned by %s" \
         #    % (owned_planetary_name, owned_planetary, planetary_owner)
 
-        self.game.buy_ships(player, "ain", 4)
+        #self.game.buy_ships(player, "ain", 4)
 
     def postloop(self):
         """Take care of any unfinished business.

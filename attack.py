@@ -76,8 +76,8 @@ class Attack():
 
                 # ship was destroyed, remove from fleet
                 if not ship.is_hull_intact():
-                    ship._destroyed = True
                     ship._fleet.remove_ship(ship)
+                    ship._fleet.get_owner().remove_ship(ship)
                     continue
 
                 # guns were depleted

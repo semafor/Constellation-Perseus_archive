@@ -1,6 +1,12 @@
 class Fleet():
-    def __init__(self):
+    def __init__(self, owner=None):
 
+        try:
+            owner.get_planetary()
+        except:
+            raise ValueError("Fleet needs owner: %s" % str(owner))
+
+        self.owner = owner
         self.ships = []
         self.mission = None
 
@@ -49,6 +55,9 @@ class Fleet():
 
     def get_ships(self):
         return self.ships
+
+    def get_owner(self):
+        return self.owner
 
     def tick(self):
         self.data_invariant()
