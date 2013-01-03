@@ -1,3 +1,6 @@
+from random import shuffle
+
+
 class Force():
     def __init__(self, fleets):
 
@@ -45,30 +48,21 @@ class Force():
                         but still in fleet %s"\
                         % (str(ship), str(fleet)))
 
+        shuffle(ships)
+
         return ships
-
-    def get_fired_guns(self):
-        guns = 0
-        for ship in self.get_all_ships():
-            if(ship.is_guns_warm() and ship.is_hull_intact()):
-                guns = guns + ship.get_guns()
-                ship.guns_fire()
-
-        return guns
 
     def get_warm_guns(self):
         guns = 0
         for ship in self.get_all_ships():
-            if(ship.is_guns_warm() and ship.is_hull_intact()):
-                guns = guns + ship.get_guns()
 
-        return guns
+            if not ship.is_hull_intact():
+                continue
 
-    def get_cold_guns(self):
-        guns = 0
-        for ship in self.get_all_ships():
-            if not ship.is_guns_warm() and ship.is_hull_intact():
-                guns = guns + ship.get_guns()
+            guns = guns + len(ship.get_amount_of_warm_guns())
+
+            # fire guns
+            ship.fire_guns()
 
         return guns
 

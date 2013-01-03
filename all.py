@@ -146,8 +146,8 @@ class Console(cmd.Cmd):
         for player in players:
 
             ships_of_type = {}
-            ships_of_type["ain"] = 0
-            ships_of_type["beid"] = 0
+            for t in self.game.get_available_ships():
+                ships_of_type[t] = 0
 
             for n, ship in enumerate(player.get_ships()):
                 t = ship.get_name().lower()
@@ -166,18 +166,18 @@ class Console(cmd.Cmd):
 
                 print "\t\tFleet #%d" % (n + 1)
 
+                ships_of_type = {}
+                for t in self.game.get_available_ships():
+                    ships_of_type[t] = 0
+
+                for n, ship in enumerate(fleet.get_ships()):
+                    t = ship.get_name().lower()
+                    ships_of_type[t] = ships_of_type[t] + 1
+
                 if(mission):
 
-                    ships_of_type = {}
-                    ships_of_type["ain"] = 0
-                    ships_of_type["beid"] = 0
-
-                    for n, ship in enumerate(fleet.get_ships()):
-                        t = ship.get_name().lower()
-                        ships_of_type[t] = ships_of_type[t] + 1
-
-                    print "\t\t\t%d ships on a mission (%s)" % (len(fleet.get_ships()), mission.get_stage())
-                    print "\t\t\tInvolved ships: %s" % str(ships_of_type)
+                    print "\t\t\t%d ships:\n\t\t\t\t%s" % (len(fleet.get_ships()), str(ships_of_type))
+                    print "\t\t\tMission status: %s" % mission.get_stage()
 
                     if(mission.get_on_enroute()):
                         print "\t\t\t\t%sing %s in %d ticks"\
@@ -190,7 +190,7 @@ class Console(cmd.Cmd):
                             % mission.get_ticks_until_base()
 
                 else:
-                    print "\t\t\t%d ships on base" % len(fleet.get_ships())
+                    print "\t\t\t%d ships on base:\n\t\t\t\t%s" % (len(fleet.get_ships()), str(ships_of_type))
 
     def do_player(self, args):
         args = shlex.split(args)
@@ -347,7 +347,8 @@ class Console(cmd.Cmd):
             except game.GameException as e:
                 print "Failed to buy: %s" % e
                 return
-            except:
+            except Exception as e:
+                print e
                 print usage_buy
                 return
 
@@ -430,19 +431,21 @@ class Console(cmd.Cmd):
         player_a = self.game.create_player(name="a", allotropes=1000000)
         print "* new player %s (%s)" % (player_a.get_name(), player_a.get_id())
 
-        self.game.buy_ships(player_a, "ain", 100)
-        print "* new player %s %d ships of type %s" % (player_a.get_name(), 100, "ain")
-
-        self.game.buy_ships(player_a, "beid", 100, 1)
-        print "* player %s bougth %d ships of type %s" % (player_a.get_name(), 100, "beid")
-
         player_b = self.game.create_player(name="b", allotropes=100000)
         print "* new player %s (%s)" % (player_b.get_name(), player_b.get_id())
 
-        self.game.buy_ships(player_b, "beid", 100)
-        print "* new player %s %d ships of type %s" % (player_b.get_name(), 100, "beid")
+        self.do_player("a buy 100 ain")
+        self.do_player("a buy 100 beid")
+        self.do_player("a buy 100 canopus")
+
+        self.do_player("b buy 200 ain")
+        self.do_player("b buy 200 beid")
 
         self.do_player("a attack b 0")
+        for i in range(10):
+            self.do_tick("next")
+        
+
 
     ## The end of game commands
     #

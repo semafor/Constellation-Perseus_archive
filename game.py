@@ -221,6 +221,9 @@ class Game():
 
     def next_tick(self):
         """Add one to tick and run tick on GameObjects"""
+        from time import time
+
+        start = time()
         self.tick.next()
 
         # player tick, updates missions
@@ -230,6 +233,9 @@ class Game():
         # planetary tick, does battles
         for p in self.get_all_planetaries():
             p.tick()
+
+        stop = time()
+        print round((stop - start) * 1000.0, 2), "ms"
 
     def get_current_tick(self):
         """Return current tick"""

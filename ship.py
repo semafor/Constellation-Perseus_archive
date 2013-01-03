@@ -1,5 +1,6 @@
 import gameobject
 from math import floor
+from random import randint
 
 
 class Ship(gameobject.GameObject):
@@ -7,7 +8,7 @@ class Ship(gameobject.GameObject):
 
             evade=0, hull=0, counter_measures=None,
 
-            guns=0, gun_warmup=0,
+            guns=0, guns_warmup_time=0,
 
             shields=0, shields_restore_time=0):
 
@@ -21,22 +22,13 @@ class Ship(gameobject.GameObject):
 
         # guns
         self.guns = guns
-        self.gun_warmup = gun_warmup
-        self.current_gun_warmth = 0
+        self.guns_warmup_time = guns_warmup_time
+        self.guns_states = [0] * self.guns
 
         # shields
         self.shields = shields
         self.shields_restore_time = shields_restore_time
         self.current_shields_health = shields
-
-        # data
-        self.data = {
-            "guns_shots": 0,
-            "guns_missed_shots": 0,
-            "battle_waves": 0,
-            "shields_hits": 0,
-            "hull_hits": 0,
-        }
 
         if ship_class == 0 or ship_class > len(CLASSES):
             raise ShipException("ship_class %s is N/A " % str(ship_class))
@@ -122,8 +114,6 @@ class Ship(gameobject.GameObject):
             self.hull_hit()
             successful_absorb = False
 
-        self.data["shields_hits"] = self.data["shields_hits"] + 1
-
         self.data_invariant()
 
         return successful_absorb
@@ -166,8 +156,6 @@ class Ship(gameobject.GameObject):
         if(self.get_hull > 0):
             self.set_hull(self.get_hull() - 1)
 
-        self.data["hull_hits"] = self.data["hull_hits"] + 1
-
         self.data_invariant()
 
     def get_guns(self):
@@ -179,35 +167,70 @@ class Ship(gameobject.GameObject):
     def get_class_name(self):
         return CLASSES[self.ship_class]["name"]
 
-    def get_gun_warmth(self):
-        return self.current_gun_warmth
+    def get_guns_states(self):
+        return self.guns_states
 
-    def is_guns_warm(self):
-        return (self.gun_warmup == self.current_gun_warmth)
-
-    def set_gun_warmth(self, gun_warmth):
+    def set_gun_state(self, index, state):
         self.data_invariant()
 
-        self.current_gun_warmth = gun_warmth
+        if(type(index) != type(1)):
+            raise ValueError("Index not an int: %s" % str(index))
+
+        if(type(state) != type(1)):
+            raise ValueError("State not an int: %s" % str(state))
+
+        self.guns_states[index] = state
 
         self.data_invariant()
 
-    def guns_fire(self):
+    def get_gun_state(self, index):
+        return self.guns_states[index]
+
+    def is_gun_warm(self, index):
+        return self.get_gun_state(index) == self.guns_warmup_time
+
+    def get_amount_of_warm_guns(self):
+        return [g for g in self.get_guns_states() if g == self.guns_warmup_time]
+
+    def get_indices_of_warm_guns(self):
+        indices = []
+        for i in range(self.guns):
+            if(self.is_gun_warm(i)):
+                indices.append(i)
+
+        return indices
+
+    def warm_guns(self):
+        self.data_invariant()
+        self.guns_states = [x + 1 for x in self.guns_states]
         self.data_invariant()
 
-        self.data["guns_shots"] = self.data["guns_shots"] + 1
-        self.set_gun_warmth(0)
+    def reset_guns(self):
+        self.data_invariant()
+        self.guns_states = [0 for x in self.guns_states]
+        self.data_invariant()
+
+    def fire_guns(self):
+        self.data_invariant()
+        for gun_index in self.get_indices_of_warm_guns():
+            self.set_gun_state(gun_index, 0)
+        self.data_invariant()
+
+    def destroy_random_gun(self):
+        self.data_invariant()
+
+        guns_length = self.get_guns() - 1
+        gun = randint(0, guns_length)
+
+        self.set_gun_state(gun, -100)
 
         self.data_invariant()
 
     def attack_tick(self):
         self.data_invariant()
 
-        self.data["battle_waves"] = self.data["battle_waves"] + 1
-
         # gun warmup
-        if(self.get_gun_warmth() < self.gun_warmup):
-            self.set_gun_warmth(self.get_gun_warmth() + 1)
+        self.warm_guns()
 
         # shield tickly restore
         self.shields_restore()
@@ -225,7 +248,7 @@ class Ship(gameobject.GameObject):
             "price": str(self.price),
 
             "guns": str(self.guns),
-            "gun_warmup": str(self.gun_warmup),
+            "guns_warmup_time": str(self.guns_warmup_time),
             "current_gun_warmth": str(self.current_gun_warmth),
 
             "shields": str(self.shields),
@@ -241,6 +264,8 @@ class Ship(gameobject.GameObject):
         }
 
     def data_invariant(self):
+        if not __debug__:
+            return None
 
         if(type(self.name) != type("")):
             raise ValueError("Name %s not a string" % str(self.name))
@@ -267,16 +292,12 @@ class Ship(gameobject.GameObject):
             raise ValueError("Guns %s not an int" % str(self.guns))
 
         # guns warmup
-        if(type(self.gun_warmup) != type(1)):
-            raise ValueError("Warmup %s not an int" % str(self.gun_warmup))
-        if(type(self.current_gun_warmth) != type(1)):
-            raise ValueError("Current gun warmth %s not an int"\
-                % str(self.current_gun_warmth))
-        if(self.gun_warmup < self.current_gun_warmth):
-            raise ValueError("Current gun warmth %s warmer than warm"\
-                % str(self.current_gun_warmth))
-        if(self.gun_warmup % 2 != 0):
-            raise ValueError("Gun warmup needs to be an even int")
+        if(type(self.guns_warmup_time) != type(1)):
+            raise ValueError("Warmup %s not an int" % str(self.guns_warmup_time))
+
+        # guns states
+        if(type(self.guns_states) != type([])):
+            raise ValueError("Guns states %s not an array" % str(self.guns_states))
 
         # shields
         if(type(self.shields) != type(1)):
@@ -302,9 +323,9 @@ TYPES = {
         "price": 100,
         "hull": 150,
         "guns": 5,
-        "gun_warmup": 2,
-        "shields": 100,
-        "shields_restore_time": 3
+        "guns_warmup_time": 2,
+        "shields": 50,
+        "shields_restore_time": 2
     },
     "beid": {
         "name": "Beid",
@@ -312,9 +333,19 @@ TYPES = {
         "price": 250,
         "hull": 250,
         "guns": 10,
-        "gun_warmup": 2,
+        "guns_warmup_time": 2,
         "shields": 300,
         "shields_restore_time": 3
+    },
+    "canopus": {
+        "name": "Canopus",
+        "ship_class": 3,
+        "price": 500,
+        "hull": 1000,
+        "guns": 250,
+        "guns_warmup_time": 4,
+        "shields": 1000,
+        "shields_restore_time": 5
     }
 }
 

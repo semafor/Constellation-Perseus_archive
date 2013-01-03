@@ -6,7 +6,7 @@ from mission import DEFAULT_TRAVEL_TIME
 
 class Player(gameobject.GameObject):
     def __init__(self, name=None,
-            allotropes=None, ships=None, workforce=12,
+            allotropes=0, ships=0, workforce=12,
             planetary=None, active=True):
 
         if not name:

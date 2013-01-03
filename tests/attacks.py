@@ -4,16 +4,22 @@ import fleet
 import ship
 import force
 
+import player
+import planetary
+
 
 class TestAinVsAin(unittest.TestCase):
 
     def _build_force(self, ship_type, amount):
-        flt = fleet.Fleet()
+        dummy_planetary = planetary.Planetary(name="xy")
+        dummy_player = player.Player(name="x", planetary=dummy_planetary)
+        flt = fleet.Fleet(owner=dummy_player)
         ships = []
         for i in range(amount):
             ships.append(ship.Ship(**ship.TYPES[ship_type]))
 
         flt.assign_ships(ships)
+        dummy_player.add_ships(ships, 0)
         return force.Force(flt)
 
     def setUp(self):
@@ -81,10 +87,10 @@ class TestAinVsAin(unittest.TestCase):
 
             attack.Attack(a, b)
 
-            print "\n%d vs %d" % (_a, _b)
+            #print "\n%d vs %d" % (_a, _b)
 
-            print "Attacker (%s) lost:\t%d" % (_a_type, _a - len(a.get_all_ships()))
-            print "Defender (%s) lost:\t%d" % (_b_type, _b - len(b.get_all_ships()))
+            print "Attacker (%d %s)\tlost:\t%d" % (_a, _a_type, _a - len(a.get_all_ships()))
+            print "Defender (%d %s)\tlost:\t%d\n" % (_b, _b_type, _b - len(b.get_all_ships()))
 
     # def test_2000_ain_vs_1000_ain(self):
     #     """Something"""

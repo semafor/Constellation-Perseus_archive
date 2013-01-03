@@ -45,7 +45,7 @@ class Attack():
 
     def complete(self):
         for ship in self.all_ships:
-            ship.set_gun_warmth(0)
+            ship.reset_guns()
             ship.reset_shields()
 
     def force_vs_force(self, attacking_force, defending_force, miss_chance):
@@ -72,7 +72,10 @@ class Attack():
 
                     # critical hit destroys ship
                     if(self.get_critical_hit()):
-                        ship.set_hull(0)
+                        if randint(0, 1):
+                            ship.set_hull(0)
+                        else:
+                            ship.destroy_random_gun()
 
                 # ship was destroyed, remove from fleet
                 if not ship.is_hull_intact():
