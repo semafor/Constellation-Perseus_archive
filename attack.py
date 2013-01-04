@@ -87,11 +87,11 @@ class Attack():
 
         # specified misfire, stop firing
         if(self.get_possibility(miss_chance)):
-            continue
+            return # REVIEW:  Was continue
 
         # natural misfire, stop firing from this gun
         if(self.get_natural_misfire()):
-            continue
+            return # REVIEW:  Was continue
 
         # hit shields, if healthy, hull if not
         ship.shields_hit()

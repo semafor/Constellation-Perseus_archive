@@ -4,6 +4,10 @@ from random import randint
 
 
 class Ship(gameobject.GameObject):
+    def __str__(self):
+        """Return string representation of Ship object."""
+        return "Ship:\t" + self.name + " (" + self.ship_class + "), hull: " + str(self.hull)
+
     def __init__(self, name=None, ship_class=1, price=0,
 
             evade=0, hull=0, counter_measures=None,
@@ -159,6 +163,10 @@ class Ship(gameobject.GameObject):
     def is_hull_intact(self):
         return self.get_hull() > 0
 
+    def is_gun_warm(self, index):
+        """Return True if gun at index is ready to fire"""
+        return self.guns_states[index] >= self.warmup_time
+
     def hull_hit(self):
         if __debug__:
             self.data_invariant()
@@ -170,7 +178,15 @@ class Ship(gameobject.GameObject):
             self.data_invariant()
 
     def get_guns(self):
+        """Return number of guns"""
         return self.guns
+    
+    def get_warm_guns(self):
+        """Return number of warm guns"""
+        warm = 0
+        for i in range(self.guns):
+            warm = warm + self.is_gun_warm(i)
+        return warm
 
     def get_class_index(self):
         return self.ship_class

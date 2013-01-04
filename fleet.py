@@ -105,6 +105,7 @@ class Fleet():
         return self.ships
 
     def get_guns(self):
+        """Return number of guns in fleet"""
         guns = 0
 
         for ship in self.get_ships():
@@ -113,12 +114,13 @@ class Fleet():
         return guns
 
     def get_warm_guns(self):
-        guns = 0
+        """Return number of warm guns in fleet"""
+        warm = 0
 
         for ship in self.get_ships():
-            guns = guns + ship.get_amount_of_warm_guns()
+            warm += ship.get_warm_guns()
 
-        return guns
+        return warm
 
     def get_ships_ordered_by(self, criterion, reverse=False):
         result = []
@@ -137,7 +139,7 @@ class Fleet():
             result = sorted(self.get_ships(), key=lambda ship: ship.guns_warmup_time, reverse=reverse)
 
         elif(criterion == CLOSETOFIRING):
-            warm_guns = [gun in self.get_ships() if ]
+            warm_guns = [gun for gun in self.get_ships() if True] # TODO fix conditional in comprehension
             result = sorted(self.get_ships(), key=lambda ship: ship.get_amount_of_warm_guns, reverse=reverse)
             result = sorted(self.get_ships(), key=lambda ship: ship.guns_warmup_time, reverse=reverse)
 

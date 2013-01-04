@@ -5,6 +5,14 @@ from mission import DEFAULT_TRAVEL_TIME
 
 
 class Player(gameobject.GameObject):
+    def __str__(self):
+        """Return string representation of player object."""
+        return "Player:\t" + self.name + \
+            "\n\tAllotropes:\t" + str(self.allotropes) + \
+            "\n\t# Ships:\t" + str(len(self.ships)) + \
+            "\n\tWorkforce:\t" + str(self.workforce) + \
+            "\n\tPlanetary:\t" + str(self.planetary)
+    
     def __init__(self, name=None,
             allotropes=0, ships=0, workforce=12,
             planetary=None, active=True):
