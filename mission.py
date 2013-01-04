@@ -52,10 +52,12 @@ class Mission():
 
         self.stage = PREPARATIONS
 
-        self._data_invariant()
+        if __debug__:
+            self._data_invariant()
 
     def tick(self):
-        self._data_invariant()
+        if __debug__:
+            self._data_invariant()
 
         if(self.stage == PREPARATIONS):
             self.stage = ENROUTE
@@ -78,24 +80,30 @@ class Mission():
 
         self.post_tick_stage_update()
 
-        self._data_invariant()
+        if __debug__:
+            self._data_invariant()
 
     def towards_destination(self):
-        self._data_invariant()
+        if __debug__:
+            self._data_invariant()
 
         self.travel_tick = self.travel_tick + 1
 
-        self._data_invariant()
+        if __debug__:
+            self._data_invariant()
 
     def towards_base(self):
-        self._data_invariant()
+        if __debug__:
+            self._data_invariant()
 
         self.travel_tick = self.travel_tick - 1
 
-        self._data_invariant()
+        if __debug__:
+            self._data_invariant()
 
     def at_destination(self):
-        self._data_invariant()
+        if __debug__:
+            self._data_invariant()
 
         # register hostile fleet
         if(self.stage == ATTACK):
@@ -115,10 +123,12 @@ class Mission():
             raise MissionException("at_destination in unknown state %s"\
                 % str(self.mission_type))
 
-        self._data_invariant()
+        if __debug__:
+            self._data_invariant()
 
     def post_tick_stage_update(self):
-        self._data_invariant()
+        if __debug__:
+            self._data_invariant()
 
         if(self.travel_tick == self.travel_time):
             self.stage = self.mission_type
@@ -135,7 +145,8 @@ class Mission():
         if(self.stage == DEFEND):
             self.defence()
 
-        self._data_invariant()
+        if __debug__:
+            self._data_invariant()
 
     def attack(self):
 
@@ -145,19 +156,23 @@ class Mission():
         pass
 
     def abort(self):
-        self._data_invariant()
+        if __debug__:
+            self._data_invariant()
 
         if(self.travel_tick > 0):
             self.stage = RETURN
         else:
             self.completed()
 
-        self._data_invariant()
+        if __debug__:
+            self._data_invariant()
 
     def completed(self):
-        self._data_invariant()
+        if __debug__:
+            self._data_invariant()
         self.fleet.set_mission(None)
-        self._data_invariant()
+        if __debug__:
+            self._data_invariant()
 
     def get_player(self):
         return self.player
@@ -201,6 +216,9 @@ class Mission():
             return None
 
     def _data_invariant(self):
+        if not __debug__:
+            return None
+
         # stage
         if not type(self.stage) == type(""):
             raise ValueError("Stage is not a a str: " % str(self.stage))

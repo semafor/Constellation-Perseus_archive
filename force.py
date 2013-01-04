@@ -52,6 +52,13 @@ class Force():
 
         return ships
 
+    def get_all_ships_ordered(self, criterion, reverse=False):
+        ships = []
+        for fleet in self.get_fleets():
+            ships = ships + fleet.get_ships_ordered_by(criterion, reverse)
+
+        return ships
+
     def get_warm_guns(self):
         guns = 0
         for ship in self.get_all_ships():

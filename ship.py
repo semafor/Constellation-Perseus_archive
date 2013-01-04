@@ -39,7 +39,8 @@ class Ship(gameobject.GameObject):
         self.display_name = "%s, a ship, class %d, costing %d" \
             % (self.name, self.ship_class, self.price)
 
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
     def get_attack_points(self):
         points = 1
@@ -86,11 +87,13 @@ class Ship(gameobject.GameObject):
         return self.shields
 
     def set_shields_health(self, health):
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
         self.current_shields_health = health
 
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
     def get_shields_health(self):
         return self.current_shields_health
@@ -103,7 +106,8 @@ class Ship(gameobject.GameObject):
 
         Return True if shields took hit, False if hull took hit
         """
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
         successful_absorb = True
 
@@ -114,12 +118,14 @@ class Ship(gameobject.GameObject):
             self.hull_hit()
             successful_absorb = False
 
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
         return successful_absorb
 
     def shields_restore(self):
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
         tickly_restore_value =\
             int(floor(self.shields / self.shields_restore_time))
@@ -132,17 +138,20 @@ class Ship(gameobject.GameObject):
             self.set_shields_health(self.get_shields_health()\
                 + tickly_restore_value)
 
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
     def get_counter_measures(self):
         return self.counter_measures
 
     def set_hull(self, hull):
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
         self.hull = hull
 
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
     def get_hull(self):
         return self.hull
@@ -151,12 +160,14 @@ class Ship(gameobject.GameObject):
         return self.get_hull() > 0
 
     def hull_hit(self):
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
         if(self.get_hull > 0):
             self.set_hull(self.get_hull() - 1)
 
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
     def get_guns(self):
         return self.guns
@@ -171,7 +182,8 @@ class Ship(gameobject.GameObject):
         return self.guns_states
 
     def set_gun_state(self, index, state):
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
         if(type(index) != type(1)):
             raise ValueError("Index not an int: %s" % str(index))
@@ -181,7 +193,8 @@ class Ship(gameobject.GameObject):
 
         self.guns_states[index] = state
 
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
     def get_gun_state(self, index):
         return self.guns_states[index]
@@ -201,33 +214,42 @@ class Ship(gameobject.GameObject):
         return indices
 
     def warm_guns(self):
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
         self.guns_states = [x + 1 for x in self.guns_states]
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
     def reset_guns(self):
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
         self.guns_states = [0 for x in self.guns_states]
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
     def fire_guns(self):
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
         for gun_index in self.get_indices_of_warm_guns():
             self.set_gun_state(gun_index, 0)
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
     def destroy_random_gun(self):
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
         guns_length = self.get_guns() - 1
         gun = randint(0, guns_length)
 
         self.set_gun_state(gun, -100)
 
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
     def attack_tick(self):
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
         # gun warmup
         self.warm_guns()
@@ -235,7 +257,8 @@ class Ship(gameobject.GameObject):
         # shield tickly restore
         self.shields_restore()
 
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
     def dump_data(self):
         return {

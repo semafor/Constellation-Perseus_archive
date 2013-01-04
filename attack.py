@@ -1,4 +1,5 @@
 from random import randint
+from fleet import DEFENSIVE, AGGRESSIVE, CURRENTSHIELDS, CLOSETOFIRING
 
 ATTACK_TICKS = 10
 
@@ -50,42 +51,57 @@ class Attack():
 
     def force_vs_force(self, attacking_force, defending_force, miss_chance):
 
-        # get warmed up guns
-        attacking_force_guns = attacking_force.get_warm_guns()
+        # defending ships
+        defending_ships = []
 
-        if(attacking_force_guns):
-            for ship in defending_force.get_all_ships():
-                while(ship.is_hull_intact() and attacking_force_guns):
+        for fleet in attacking_force.get_fleets():
+            attack_mode = fleet.get_attack_mode()
+            attacking_guns = fleet.get_warm_guns()
 
-                    attacking_force_guns = attacking_force_guns - 1
+            if(attack_mode == DEFENSIVE):
+                defending_ships = defending_force.get_all_ships_ordered(CURRENTSHIELDS)
+            elif(attack_mode == AGGRESSIVE):
+                defending_ships = defending_force.get_all_ships_ordered(CURRENTSHIELDS)
 
-                    # specified misfire, stop firing
-                    if(self.get_possibility(miss_chance)):
-                        continue
 
-                    # natural misfire, stop firing from this gun
-                    if(self.get_natural_misfire()):
-                        continue
 
-                    # hit shields, if healthy, hull if not
-                    ship.shields_hit()
+        # if(attacking_force_guns):
+        #     for ship in defending_force.get_all_ships():
+        #         while(ship.is_hull_intact() and attacking_force_guns):
 
-                    # critical hit destroys ship
-                    if(self.get_critical_hit()):
-                        if randint(0, 1):
-                            ship.set_hull(0)
-                        else:
-                            ship.destroy_random_gun()
+        #             attacking_force_guns = attacking_force_guns - 1
 
-                # ship was destroyed, remove from fleet
-                if not ship.is_hull_intact():
-                    ship._fleet.remove_ship(ship)
-                    ship._fleet.get_owner().remove_ship(ship)
-                    continue
+        #             self.gun_vs_ship(ship)
 
-                # guns were depleted
-                if(attacking_force_guns == 0):
-                    break
+        #         # ship was destroyed, remove from fleet
+        #         if not ship.is_hull_intact():
+        #             ship._fleet.remove_ship(ship)
+        #             ship._fleet.get_owner().remove_ship(ship)
+        #             continue
+
+        #         # guns were depleted
+        #         if(attacking_force_guns == 0):
+        #             break
+
+    def gun_vs_ship(self, ship, miss_chance):
+
+        # specified misfire, stop firing
+        if(self.get_possibility(miss_chance)):
+            continue
+
+        # natural misfire, stop firing from this gun
+        if(self.get_natural_misfire()):
+            continue
+
+        # hit shields, if healthy, hull if not
+        ship.shields_hit()
+
+        # critical hit destroys ship
+        if(self.get_critical_hit()):
+            if randint(0, 1):
+                ship.set_hull(0)
+            else:
+                ship.destroy_random_gun()
 
     def get_possibility(self, percentage):
         return randint(1, 100) <= percentage

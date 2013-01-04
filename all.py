@@ -434,18 +434,21 @@ class Console(cmd.Cmd):
         player_b = self.game.create_player(name="b", allotropes=100000)
         print "* new player %s (%s)" % (player_b.get_name(), player_b.get_id())
 
-        self.do_player("a buy 100 ain")
-        self.do_player("a buy 100 beid")
-        self.do_player("a buy 100 canopus")
+        # self.do_player("a buy 100 ain")
+        # self.do_player("a buy 100 beid")
+        # self.do_player("a buy 100 canopus")
 
-        self.do_player("b buy 200 ain")
-        self.do_player("b buy 200 beid")
+        # self.do_player("b buy 200 ain")
+        # self.do_player("b buy 200 beid")
 
-        self.do_player("a attack b 0")
-        for i in range(10):
-            self.do_tick("next")
-        
+        # self.do_player("a attack b 0")
+        #for i in range(10):
+        #    self.do_tick("next")
 
+
+        self.do_player("a buy 2 ain")
+        self.do_player("a buy 2 beid")
+        self.do_player("a buy 2 canopus")
 
     ## The end of game commands
     #

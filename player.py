@@ -41,11 +41,13 @@ class Player(gameobject.GameObject):
         return self.planetary
 
     def set_planetary(self, planetary_id):
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
         self.planetary = planetary_id
 
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
     def get_ships(self):
         return self.ships
@@ -57,24 +59,29 @@ class Player(gameobject.GameObject):
         return self.workforce
 
     def set_allotropes(self, allotropes):
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
         self.allotropes = allotropes
 
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
     def add_allotropes(self, amount):
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
         if(amount < 0):
             amount = 0
 
         self.set_allotropes(self.get_allotropes() + amount)
 
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
     def remove_allotropes(self, amount):
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
         current_amount = self.get_allotropes()
         diff = current_amount - amount
@@ -87,23 +94,28 @@ class Player(gameobject.GameObject):
 
         self.set_allotropes(self.get_allotropes() - amount)
 
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
     def add_ships(self, ships, fleet_index):
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
         self.ships = self.ships + ships
 
         self.get_fleet(fleet_index).append_ships(ships)
 
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
     def remove_ship(self, ship):
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
         self.ships.remove(ship)
 
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
     def get_travel_time(self):
         return DEFAULT_TRAVEL_TIME
@@ -119,7 +131,8 @@ class Player(gameobject.GameObject):
         return len(self.get_ships()) + self.get_workforce() * 100
 
     def tick(self):
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
         #print "Tick on %s" % self.get_display_name()
         for fleet in self.get_fleets():
@@ -130,9 +143,12 @@ class Player(gameobject.GameObject):
 
             fleet.tick()
         self.add_allotropes(self.get_allotropes_per_tick())
-        self.data_invariant()
+        if __debug__:
+            self.data_invariant()
 
     def data_invariant(self):
+        if not __debug__:
+            return None
 
         # name
         if not type(self.name) == type(""):
