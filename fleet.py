@@ -11,6 +11,7 @@ CURRENTGUNS = "currentguns"
 GUNWARMUP = "gunwarmup"
 
 CLOSETOFIRING = "closetofiring"
+CLOSETODESTRUCT = "closetodestruct"
 
 TOTALSHIELDS = "totalshields"
 CURRENTSHIELDS = "totalshields"
@@ -38,7 +39,7 @@ class Fleet():
         "Blast" mode is more risky but effective as it can take out shields and hull in one go, effectively wiping out more ships."""
 
         # "Defensive" or "Aggressive"
-        self.attack_mode = DEFENSIVE
+        self.attack_mode = AGGRESSIVE
         """The two attack modes are "Defensive" and "Aggressive".  In the "Defensive" mode, the fleet will try to take out ships
         that poses an immediate threat to the fleet, not necessarily trying to kill the most number of enemy ships. The other
         mode, "Aggressive", aims to maximize the number of killed enemy ships.  Every ship in the fleet will try to take out a
@@ -68,7 +69,7 @@ class Fleet():
 
         self.ships = self.ships + ships
 
-        self.get_ships_ordered_by(TOTALSHIELDS)
+        self.get_ships_ordered_by(CLOSETOFIRING)
 
         if __debug__:
             self.data_invariant()
@@ -123,14 +124,19 @@ class Fleet():
         return warm
 
     def get_ships_ordered_by(self, criterion, reverse=False):
+        """Return ships in fleet ordered by criterion, ascending by default"""
+
         result = []
 
+        # class
         if(criterion == CLASS):
             result = sorted(self.get_ships(), key=lambda ship: ship.get_class_index(), reverse=reverse)
 
+        # hull
         elif(criterion == HULL):
             result = sorted(self.get_ships(), key=lambda ship: ship.get_hull(), reverse=reverse)
 
+        # guns
         elif(criterion == CURRENTGUNS):
             result = sorted(self.get_ships(), key=lambda ship: ship.get_amount_of_warm_guns(), reverse=reverse)
         elif(criterion == TOTALGUNS):
@@ -138,12 +144,13 @@ class Fleet():
         elif(criterion == GUNWARMUP):
             result = sorted(self.get_ships(), key=lambda ship: ship.guns_warmup_time, reverse=reverse)
 
+        # composite
         elif(criterion == CLOSETOFIRING):
-            warm_guns = [gun for gun in self.get_ships() if True] # TODO fix conditional in comprehension
-            result = sorted(self.get_ships(), key=lambda ship: ship.get_amount_of_warm_guns, reverse=reverse)
-            result = sorted(self.get_ships(), key=lambda ship: ship.guns_warmup_time, reverse=reverse)
+            result = sorted(self.get_ships(), key=lambda ship: (-ship.get_amount_of_warm_guns(), ship.guns_warmup_time))
+        elif(criterion == CLOSETODESTRUCT):
+            result = sorted(self.get_ships(), key=lambda ship: (ship.get_hull(), ship.get_shields_health()))
 
-
+        # shields
         elif(criterion == CURRENTSHIELDS):
             result = sorted(self.get_ships(), key=lambda ship: ship.get_shields_health(), reverse=reverse)
         elif(criterion == TOTALSHIELDS):

@@ -430,26 +430,36 @@ class Console(cmd.Cmd):
     def do_test(self, args):
         player_a = self.game.create_player(name="a", allotropes=1000000)
         print "* new player %s (%s)" % (player_a.get_name(), player_a.get_id())
-        
+
         player_b = self.game.create_player(name="b", allotropes=100000)
         print "* new player %s (%s)" % (player_b.get_name(), player_b.get_id())
-        
+
         self.do_player("a buy 100 ain")
         self.do_player("a buy 100 beid")
-        self.do_player("a buy 100 canopus")
+        self.do_player("a buy 10 canopus")
         self.do_player("b buy 200 ain")
         self.do_player("b buy 200 beid")
 
         print player_a
         print player_b
-        
+
         self.do_player("a attack b 0")
         for i in range(10):
             self.do_tick("next")
-        
+
         print "\n=========\nEnd of test\n=========\n"
         print player_a
         print player_b
+
+    def do_smalltest(self, args):
+        player_a = self.game.create_player(name="a", allotropes=1000000)
+        print "* new player %s (%s)" % (player_a.get_name(), player_a.get_id())
+
+        self.do_player("a buy 1 ain")
+        self.do_player("a buy 1 beid")
+        self.do_player("a buy 1 canopus")
+
+        print player_a
 
     ## The end of game commands
     #

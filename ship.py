@@ -29,6 +29,9 @@ class Ship(gameobject.GameObject):
         self.guns_warmup_time = guns_warmup_time
         self.guns_states = [0] * self.guns
 
+        #if(name == "Canopus"):
+        #    self.guns_states = [55] * guns
+
         # shields
         self.shields = shields
         self.shields_restore_time = shields_restore_time
@@ -165,7 +168,7 @@ class Ship(gameobject.GameObject):
 
     def is_gun_warm(self, index):
         """Return True if gun at index is ready to fire"""
-        return self.guns_states[index] >= self.warmup_time
+        return self.guns_states[index] >= self.guns_warmup_time
 
     def hull_hit(self):
         if __debug__:
@@ -180,7 +183,7 @@ class Ship(gameobject.GameObject):
     def get_guns(self):
         """Return number of guns"""
         return self.guns
-    
+
     def get_warm_guns(self):
         """Return number of warm guns"""
         warm = 0
@@ -215,11 +218,8 @@ class Ship(gameobject.GameObject):
     def get_gun_state(self, index):
         return self.guns_states[index]
 
-    def is_gun_warm(self, index):
-        return self.get_gun_state(index) == self.guns_warmup_time
-
     def get_amount_of_warm_guns(self):
-        return [g for g in self.get_guns_states() if g == self.guns_warmup_time]
+        return len(self.get_indices_of_warm_guns())
 
     def get_indices_of_warm_guns(self):
         indices = []
