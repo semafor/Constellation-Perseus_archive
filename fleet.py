@@ -39,7 +39,7 @@ class Fleet():
         "Blast" mode is more risky but effective as it can take out shields and hull in one go, effectively wiping out more ships."""
 
         # "Defensive" or "Aggressive"
-        self.attack_mode = AGGRESSIVE
+        self.attack_mode = DEFENSIVE
         """The two attack modes are "Defensive" and "Aggressive".  In the "Defensive" mode, the fleet will try to take out ships
         that poses an immediate threat to the fleet, not necessarily trying to kill the most number of enemy ships. The other
         mode, "Aggressive", aims to maximize the number of killed enemy ships.  Every ship in the fleet will try to take out a

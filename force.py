@@ -35,6 +35,8 @@ class Force():
         for fleet in self.get_fleets():
             for ship in fleet.get_ships():
                 ships.append(ship)
+
+                # FIXME: getter shall not change ship
                 ship._fleet = fleet
 
                 destroyed = False

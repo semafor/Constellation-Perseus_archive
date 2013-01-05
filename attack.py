@@ -9,7 +9,6 @@ NATURAL_MISFIRE = 5
 
 class Attack():
     def __init__(self, attacking_force, defending_force):
-
         self.attack_tick = 0
 
         try:
