@@ -68,10 +68,7 @@ class Force():
             if not ship.is_hull_intact():
                 continue
 
-            guns = guns + len(ship.get_amount_of_warm_guns())
-
-            # fire guns
-            ship.fire_guns()
+            guns = guns + len(ship.get_wam_guns())
 
         return guns
 

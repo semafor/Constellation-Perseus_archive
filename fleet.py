@@ -1,5 +1,7 @@
 ATWILL = "atwill"
-COORDINATED = "coordinated"
+TIMED = "timed"
+TIMEDTHRESHOLD = 90  # how many percent of guns must be warm before firing
+
 
 DEFENSIVE = "defensive"
 AGGRESSIVE = "aggressive"
@@ -99,9 +101,6 @@ class Fleet():
         if(self.get_mission()):
             self.get_mission().abort()
 
-    def get_raw_ships(self):
-        return self.ships
-
     def get_ships(self):
         return self.ships
 
@@ -138,7 +137,7 @@ class Fleet():
 
         # guns
         elif(criterion == CURRENTGUNS):
-            result = sorted(self.get_ships(), key=lambda ship: ship.get_amount_of_warm_guns(), reverse=reverse)
+            result = sorted(self.get_ships(), key=lambda ship: ship.get_warm_guns(), reverse=reverse)
         elif(criterion == TOTALGUNS):
             result = sorted(self.get_ships(), key=lambda ship: ship.guns, reverse=reverse)
         elif(criterion == GUNWARMUP):
@@ -146,7 +145,7 @@ class Fleet():
 
         # composite
         elif(criterion == CLOSETOFIRING):
-            result = sorted(self.get_ships(), key=lambda ship: (-ship.get_amount_of_warm_guns(), ship.guns_warmup_time))
+            result = sorted(self.get_ships(), key=lambda ship: (-ship.get_warm_guns(), ship.guns_warmup_time))
         elif(criterion == CLOSETODESTRUCT):
             result = sorted(self.get_ships(), key=lambda ship: (ship.get_hull(), ship.get_shields_health()))
 
@@ -223,7 +222,7 @@ class Fleet():
                 raise FleetException("Bad fleet mission %s"\
                     % str(mission.get_stage()))
 
-        if(self.coordination_mode != ATWILL and self.coordination_mode != COORDINATED):
+        if(self.coordination_mode != ATWILL and self.coordination_mode != TIMED):
             raise ValueError("coordination_mode not valid: %s" % str(self.coordination_mode))
 
         if(self.attack_mode != AGGRESSIVE and self.attack_mode != DEFENSIVE):

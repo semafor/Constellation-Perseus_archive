@@ -26,11 +26,15 @@ class Ship(gameobject.GameObject):
 
         # guns
         self.guns = guns
+        self._original_guns = guns
         self.guns_warmup_time = guns_warmup_time
         self.guns_states = [0] * self.guns
 
-        #if(name == "Canopus"):
-        #    self.guns_states = [55] * guns
+        self.temp_to_guns = {0: guns}
+        """A map from temperature to number of guns of that temperature."""
+
+        # if (name == "Canopus"):
+        #     self.guns_states = [55] * guns
 
         # shields
         self.shields = shields
@@ -168,6 +172,8 @@ class Ship(gameobject.GameObject):
 
     def is_gun_warm(self, index):
         """Return True if gun at index is ready to fire"""
+        assert not self.data_invariant()
+
         return self.guns_states[index] >= self.guns_warmup_time
 
     def hull_hit(self):
@@ -182,13 +188,24 @@ class Ship(gameobject.GameObject):
 
     def get_guns(self):
         """Return number of guns"""
+        if __debug__:
+            self.data_invariant()
         return self.guns
 
     def get_warm_guns(self):
         """Return number of warm guns"""
+        assert not self.data_invariant()
         warm = 0
         for i in range(self.guns):
             warm = warm + self.is_gun_warm(i)
+
+
+        dwarm = 0
+        if self.guns_warmup_time in self.temp_to_guns:
+            dwarm = self.temp_to_guns[self.guns_warmup_time]
+        assert warm == dwarm, "get_warm_guns(): warm in list vs warm in dict" + str(warm) + " vs " + str (dwarm)
+
+        assert not self.data_invariant()
         return warm
 
     def get_class_index(self):
@@ -210,6 +227,15 @@ class Ship(gameobject.GameObject):
         if(type(state) != type(1)):
             raise ValueError("State not an int: %s" % str(state))
 
+
+        temp = self.get_gun_state(index)
+        if (temp != 0):
+            if state in self.temp_to_guns:
+                self.temp_to_guns[state] += 1
+            else:
+                self.temp_to_guns[state] = 1
+            self.temp_to_guns[temp] -= 1
+
         self.guns_states[index] = state
 
         if __debug__:
@@ -218,13 +244,11 @@ class Ship(gameobject.GameObject):
     def get_gun_state(self, index):
         return self.guns_states[index]
 
-    def get_amount_of_warm_guns(self):
-        return len(self.get_indices_of_warm_guns())
-
     def get_indices_of_warm_guns(self):
+        assert not self.data_invariant()
         indices = []
         for i in range(self.guns):
-            if(self.is_gun_warm(i)):
+            if (self.is_gun_warm(i)):
                 indices.append(i)
 
         return indices
@@ -232,22 +256,72 @@ class Ship(gameobject.GameObject):
     def warm_guns(self):
         if __debug__:
             self.data_invariant()
-        self.guns_states = [x + 1 for x in self.guns_states]
+        newdict = {}
+        for (k,v) in self.temp_to_guns.items():
+            if (k >= self.guns_warmup_time):
+                if self.guns_warmup_time in newdict:
+                    newdict[self.guns_warmup_time] += v
+                else:
+                    newdict[self.guns_warmup_time] = v
+            else:
+                newdict[k+1] = v
+
+        self.temp_to_guns = newdict
+        self.guns_states = [min(self.guns_warmup_time, x + 1) for x in self.guns_states]
+
         if __debug__:
             self.data_invariant()
 
     def reset_guns(self):
         if __debug__:
             self.data_invariant()
+
         self.guns_states = [0 for x in self.guns_states]
+        self.temp_to_guns = {0 : self.guns}
+
         if __debug__:
             self.data_invariant()
 
     def fire_guns(self):
+        """Set gun state to 0 if gun is warm"""
         if __debug__:
             self.data_invariant()
+
         for gun_index in self.get_indices_of_warm_guns():
             self.set_gun_state(gun_index, 0)
+
+        warm_guns = self.temp_to_guns[self.guns_warmup_time]
+        self.temp_to_guns[self.guns_warmup_time] = 0
+        if (0 in self.temp_to_guns):
+            self.temp_to_guns[0] += warm_guns
+        else:
+            self.temp_to_guns[0] = warm_guns
+
+        if __debug__:
+            self.data_invariant()
+
+    def fire_gun(self, gun_index):
+        """Set gun index to 0"""
+        if __debug__:
+            self.data_invariant()
+
+        assert self.guns_states[gun_index] >= self.guns_warmup_time, \
+            "Cannot fire cold gun, index=" + str(gun_index) + ", temperature=" + str(self.guns_states[gun_index])
+
+        temp = self.guns_states[gun_index]
+        self.guns_states[gun_index] = 0
+
+        # if not absolutely cool
+        # add to cold guns
+        # subtract this gun from the temperature it was at
+        if (temp != 0):
+            if 0 in self.temp_to_guns:
+                self.temp_to_guns[0] += 1
+            else:
+                self.temp_to_guns[0] = 1
+
+            self.temp_to_guns[temp] -= 1
+
         if __debug__:
             self.data_invariant()
 
@@ -289,6 +363,8 @@ class Ship(gameobject.GameObject):
         # shield tickly restore
         self.shields_restore()
 
+        #print self.dump_data() + "\n"
+
         if __debug__:
             self.data_invariant()
 
@@ -304,7 +380,7 @@ class Ship(gameobject.GameObject):
 
             "guns": str(self.guns),
             "guns_warmup_time": str(self.guns_warmup_time),
-            "current_gun_warmth": str(self.current_gun_warmth),
+            "current_gun_warmth": str(self.get_guns_states()),
 
             "shields": str(self.shields),
             "shields_restore_time": str(self.shields_restore_time),
@@ -313,14 +389,40 @@ class Ship(gameobject.GameObject):
             "defence_points": str(self.get_defence_points()),
             "points": str(self.get_points()),
             "hull_intact": str(self.is_hull_intact()),
-            "class_name": str(self.get_class_name()),
-            "guns_warm": str(self.is_guns_warm()),
-            "ship_totals": self.data
+            "class_name": str(self.get_class_name())
         }
 
     def data_invariant(self):
         if not __debug__:
             return None
+
+        # counting guns in dict
+        gguns = 0
+        for (k, v) in self.temp_to_guns.items():
+            if (type(v) != type(0)):
+                raise AssertionError("Temperature mapped to non-int: %s " % str((k, v)))
+            if (v < 0):
+                raise AssertionError("Negative number of guns at temperature: %s " % str((k, v)))
+
+            #orig = sum([1 for x in self.guns_states if x == k])
+            #assert orig == v, "Error in temperatures, list vs guns, at temperatur = " + str(k) + ": " + str(orig) + " vs " + str(v)
+
+            gguns += v
+
+        assert gguns == self.guns, "Number of guns in dict vs self.guns " + str(gguns) + " != " + str(self.guns)
+
+        wguns = 0
+        for (k, v) in self.temp_to_guns.items():
+            if k > self.guns_warmup_time and v >= 0:
+                raise AssertionError("Guns too warm! " + str((k, v)) + ", when guns_warmup_time = " + str(self.guns_warmup_time))
+            if k == self.guns_warmup_time:
+                wguns += v
+
+        #wguns_orig = len([x for x in self.guns_states if x >= self.guns_warmup_time])
+
+        #assert wguns == wguns_orig, "Warm guns in dict vs in list: " + str(wguns) + " vs " + str(wguns_orig)
+
+        # print wguns
 
         if(type(self.name) != type("")):
             raise ValueError("Name %s not a string" % str(self.name))
@@ -346,6 +448,9 @@ class Ship(gameobject.GameObject):
         if(type(self.guns) != type(1)):
             raise ValueError("Guns %s not an int" % str(self.guns))
 
+        if(self.guns != self._original_guns):
+            raise ValueError("Amount of guns deviates: %s" % str(self.guns))
+
         # guns warmup
         if(type(self.guns_warmup_time) != type(1)):
             raise ValueError("Warmup %s not an int" % str(self.guns_warmup_time))
@@ -353,6 +458,15 @@ class Ship(gameobject.GameObject):
         # guns states
         if(type(self.guns_states) != type([])):
             raise ValueError("Guns states %s not an array" % str(self.guns_states))
+
+        if(len(self.guns_states) != self.guns):
+            raise ValueError("Gun states length not equal to guns lenght: %s" % str(self.guns_states))
+
+        # guns states
+        for state in self.get_guns_states():
+            if(state > self.guns_warmup_time):
+                raise ValueError("Gun state %s is higher than warmup time %s"\
+                    % (str(state), str(self.guns_warmup_time)))
 
         # shields
         if(type(self.shields) != type(1)):
