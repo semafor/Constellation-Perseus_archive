@@ -452,7 +452,7 @@ TYPES = {
         "hull": 250,
         "guns": 10,
         "guns_warm_temperature": 2,
-        "shields": 300,
+        "shields": 150,
         "shields_restore_time": 3
     },
     "canopus": {
