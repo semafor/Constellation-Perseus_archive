@@ -28,7 +28,7 @@ class Ship(gameobject.GameObject):
         self.guns = guns
         self._original_guns = guns
 
-        """Amount of ticks before guns warm"""
+        """When guns will be warm"""
         self.guns_warm_temperature = guns_warm_temperature
 
         """A map from temperature to number of guns of that temperature."""

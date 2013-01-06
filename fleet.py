@@ -141,11 +141,11 @@ class Fleet():
         elif(criterion == TOTALGUNS):
             result = sorted(self.get_ships(), key=lambda ship: ship.guns, reverse=reverse)
         elif(criterion == GUNWARMUP):
-            result = sorted(self.get_ships(), key=lambda ship: ship.guns_warmup_time, reverse=reverse)
+            result = sorted(self.get_ships(), key=lambda ship: ship.guns_warm_temperature, reverse=reverse)
 
         # composite
         elif(criterion == CLOSETOFIRING):
-            result = sorted(self.get_ships(), key=lambda ship: (-ship.get_warm_guns(), ship.guns_warmup_time))
+            result = sorted(self.get_ships(), key=lambda ship: (-ship.get_warm_guns(), ship.guns_warm_temperature))
         elif(criterion == CLOSETODESTRUCT):
             result = sorted(self.get_ships(), key=lambda ship: (ship.get_hull(), ship.get_shields_health()))
 
