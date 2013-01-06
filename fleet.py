@@ -57,7 +57,10 @@ class Fleet():
         if(type(ships) != type([])):
             raise ValueError("Ships need to come as list, not %s" % str(ships))
 
-        self.ships = ships
+        self.ships = []
+
+        for ship in ships:
+            self.add_ship(ship)
 
         if __debug__:
             self.data_invariant()
@@ -69,16 +72,23 @@ class Fleet():
         if(type(ships) != type([])):
             raise ValueError("Ships need to come as list, not %s" % str(ships))
 
-        self.ships = self.ships + ships
+        for ship in ships:
+            self.add_ship(ship)
 
-        self.get_ships_ordered_by(CLOSETOFIRING)
+        if __debug__:
+            self.data_invariant()
+
+    def add_ship(self, ship):
+        if __debug__:
+            self.data_invariant()
+
+        ship._fleet = self
+        self.ships.append(ship)
 
         if __debug__:
             self.data_invariant()
 
     def remove_ship(self, ship):
-        if __debug__:
-            self.data_invariant()
 
         self.ships.remove(ship)
 
@@ -102,6 +112,10 @@ class Fleet():
             self.get_mission().abort()
 
     def get_ships(self):
+        for ship in self.ships:
+            if not ship.is_hull_intact():
+                raise FleetException("Broken ship still in fleet")
+
         return self.ships
 
     def get_guns(self):
@@ -202,6 +216,17 @@ class Fleet():
 
         if(type(self.ships) != type([])):
             raise ValueError("Ships not a list %s" % str(self.ships))
+
+        # check ships in fleet
+        # for ship in self.ships:
+        #     if not ship._fleet == self:
+        #         raise FleetException("Ship %s _fleet field not this fleet" % ship)
+
+        #     if not ship.is_hull_intact():
+        #         raise FleetException("Ship %s is broken" % ship)
+
+        #     if(self.ships.count(ship) > 1):
+        #         raise FleetException("Ship %s appears more than once in fleet: %d" % (str(ship), self.ships.count(ship)))
 
         if(self.get_mission()):
             mission = self.get_mission()

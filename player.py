@@ -9,12 +9,12 @@ class Player(gameobject.GameObject):
         """Return string representation of player object."""
         return "Player:\t" + self.name + \
             "\n\tAllotropes:\t" + str(self.allotropes) + \
-            "\n\t# Ships:\t" + str(len(self.ships)) + \
+            "\n\tShips:\t\t" + str(len(self.get_ships())) + \
             "\n\tWorkforce:\t" + str(self.workforce) + \
             "\n\tPlanetary:\t" + str(self.planetary)
-    
+
     def __init__(self, name=None,
-            allotropes=0, ships=0, workforce=12,
+            allotropes=0, workforce=12,
             planetary=None, active=True):
 
         if not name:
@@ -22,19 +22,14 @@ class Player(gameobject.GameObject):
 
         self.name = name
         self.allotropes = allotropes
-        self.ships = ships
         self.workforce = workforce
         self.planetary = planetary
-
-        self.ships = []
 
         self.fleets = [
             fleet.Fleet(owner=self),
             fleet.Fleet(owner=self),
             fleet.Fleet(owner=self)
         ]
-
-        self.fleets[0].assign_ships(self.ships)
 
         self.display_name = "%s, a stellar commander. Workforce: %d" \
             % (self.name, self.workforce)
@@ -58,7 +53,12 @@ class Player(gameobject.GameObject):
             self.data_invariant()
 
     def get_ships(self):
-        return self.ships
+        ships = []
+
+        for fleet in self.get_fleets():
+            ships = ships + fleet.get_ships()
+
+        return ships
 
     def get_allotropes(self):
         return self.allotropes
@@ -109,18 +109,7 @@ class Player(gameobject.GameObject):
         if __debug__:
             self.data_invariant()
 
-        self.ships = self.ships + ships
-
         self.get_fleet(fleet_index).append_ships(ships)
-
-        if __debug__:
-            self.data_invariant()
-
-    def remove_ship(self, ship):
-        if __debug__:
-            self.data_invariant()
-
-        self.ships.remove(ship)
 
         if __debug__:
             self.data_invariant()
@@ -130,7 +119,7 @@ class Player(gameobject.GameObject):
 
     def get_ship_total(self):
         total = 0
-        for ship in self.ships:
+        for ship in self.get_ships():
             total = total + ship.get_points()
 
         return total
@@ -150,7 +139,9 @@ class Player(gameobject.GameObject):
                     fleet.set_mission(None)
 
             fleet.tick()
+
         self.add_allotropes(self.get_allotropes_per_tick())
+
         if __debug__:
             self.data_invariant()
 
@@ -172,10 +163,6 @@ class Player(gameobject.GameObject):
         elif(self.allotropes < 0):
             raise ValueError("Allotropes is a negative int %s"\
                 % str(self.allotropes))
-
-        if not type(self.ships) == type([]):
-            raise ValueError("Player ships not a list: %s"\
-                % str(self.ships))
 
         # workforce
         if not type(self.workforce) == type(1):

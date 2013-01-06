@@ -220,9 +220,6 @@ class Ship(gameobject.GameObject):
         if __debug__:
             self.data_invariant()
 
-        if(new_temperature > self.guns_warm_temperature):
-            raise ValueError("New gun temp too warm: %s" % str(new_temperature))
-
         if new_temperature in self.temp_to_guns:
             self.temp_to_guns[new_temperature] += 1
         else:
@@ -327,6 +324,13 @@ class Ship(gameobject.GameObject):
         if __debug__:
             self.data_invariant()
 
+    def destroy(self):
+        if not self._fleet:
+            raise ShipException("Tried to destroy ship twice")
+
+        self._fleet.ships.remove(self)
+        self._fleet = None
+
     def dump_data(self):
         return {
             "name": str(self.name),
@@ -397,6 +401,9 @@ class Ship(gameobject.GameObject):
 
         if(self.hull < 0):
             raise ValueError("Hull lt 0: %s" % str(self.hull))
+
+        if not self.is_hull_intact() and self._fleet:
+            raise ShipException("Ship still in fleet while destroyed")
 
         # price
         if(type(self.price) != type(1)):

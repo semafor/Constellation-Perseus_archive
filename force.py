@@ -36,22 +36,6 @@ class Force():
             for ship in fleet.get_ships():
                 ships.append(ship)
 
-                # FIXME: getter shall not change ship
-                ship._fleet = fleet
-
-                destroyed = False
-                try:
-                    destroyed = ship._destroyed
-                except:
-                    pass
-
-                if(destroyed):
-                    raise ValueError("Ship %s is destroyed,\
-                        but still in fleet %s"\
-                        % (str(ship), str(fleet)))
-
-        shuffle(ships)
-
         return ships
 
     def get_all_ships_ordered(self, criterion, reverse=False):
@@ -66,7 +50,7 @@ class Force():
         for ship in self.get_all_ships():
 
             if not ship.is_hull_intact():
-                continue
+                raise Exception("Broken ship was included in force")
 
             guns = guns + len(ship.get_wam_guns())
 

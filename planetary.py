@@ -48,7 +48,8 @@ class Planetary(gameobject.GameObject):
     def tick(self):
 
         if(self.hostile_fleets):
-            # register owner fleets
+
+            # register owner fleets if they are not absent
             for fleet in self.get_owner().get_fleets():
                 if not fleet.get_mission():
                     self.register_friendly_fleet(fleet)
