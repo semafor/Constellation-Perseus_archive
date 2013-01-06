@@ -78,36 +78,34 @@ class Attack():
 
             for attacking_ship in attacking_ships:
 
-                for defending_ship in defending_ships:
+                while(attacking_ship.get_warm_guns() > 0 and len(defending_ships) > 0):
 
-                    while(defending_ship.is_hull_intact() and attacking_ship.get_warm_guns() > 0):
+                    defending_ship = defending_ships[0]
 
-                        attacking_ship.fire_gun()
+                    attacking_ship.fire_gun()
 
-                        # attack/defence misfire
-                        if(randint(1, 100) <= miss_chance):
-                            continue
-
-                        # natural misfire
-                        if(randint(1, 100) <= NATURAL_MISFIRE):
-                            continue
-
-                        # critical hit destroys ship
-                        if(self.get_critical_hit()):
-                            if randint(0, 1):
-                                #defending_ship.set_hull(0)
-                                pass
-                            else:
-                                defending_ship.destroy_random_gun()
-
-                        # hit shields, if healthy, hull if not
-                        defending_ship.shields_hit()
-
-                    if not defending_ship.is_hull_intact():
+                    # attack/defence misfire
+                    if(randint(1, 100) <= miss_chance):
                         continue
 
-                    if not attacking_ship.get_warm_guns() > 0:
-                        break
+                    # natural misfire
+                    if(randint(1, 100) <= NATURAL_MISFIRE):
+                        continue
+
+                    # critical hit destroys ship
+                    if(self.get_critical_hit()):
+                        if randint(0, 1):
+                            if(defending_ship.is_hull_intact()):
+                                defending_ship.set_hull(0)
+                        else:
+                            defending_ship.destroy_random_gun()
+
+                    if not defending_ship.is_hull_intact():
+                        defending_ships.pop(0)
+                        continue
+
+                    # actual ship hit
+                    defending_ship.shields_hit()
 
     def get_critical_hit(self):
         return randint(1, 1000) <= CRITICAL_HIT
