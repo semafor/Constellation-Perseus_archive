@@ -162,6 +162,9 @@ class Ship(gameobject.GameObject):
 
         self.hull = hull
 
+        if(self.hull == 0):
+            self.destroy()
+
         if __debug__:
             self.data_invariant()
 

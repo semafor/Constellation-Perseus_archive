@@ -51,6 +51,9 @@ class Attack():
         # cycle through attacking fleets and execute their desired attack
         for attacking_fleet in attacking_force.get_fleets():
 
+            if(attacking_fleet.get_warm_guns() <= 0):
+                continue
+
             attack_mode = attacking_fleet.get_attack_mode()
             coordination_mode = attacking_fleet.get_coordination_mode()
 
@@ -75,55 +78,39 @@ class Attack():
 
             for attacking_ship in attacking_ships:
 
-                # no more defenders
-                if(len(defending_ships) == 0):
-                    break
-
                 for defending_ship in defending_ships:
 
-                    for gun in range(attacking_ship.get_warm_guns()):
-
-                        if not defending_ship.is_hull_intact():
-                            # if ship is destroyed, remove ship from all it's parent lists
-                            # TODO: ship should be able to be removed from everywhere in one command (.destroy() on ship?)
-                            continue
+                    while(defending_ship.is_hull_intact() and attacking_ship.get_warm_guns() > 0):
 
                         attacking_ship.fire_gun()
 
-                        # specified misfire, stop firing
-                        if(self.get_possibility(miss_chance)):
+                        # attack/defence misfire
+                        if(randint(1, 100) <= miss_chance):
                             continue
 
-                        # natural misfire, stop firing from this gun
-                        if(self.get_natural_misfire()):
+                        # natural misfire
+                        if(randint(1, 100) <= NATURAL_MISFIRE):
                             continue
-
-                        # hit shields, if healthy, hull if not
-                        defending_ship.shields_hit()
 
                         # critical hit destroys ship
                         if(self.get_critical_hit()):
                             if randint(0, 1):
-                                defending_ship.set_hull(0)
+                                #defending_ship.set_hull(0)
+                                pass
                             else:
                                 defending_ship.destroy_random_gun()
 
-                        if not defending_ship.is_hull_intact():
-                            # if ship is destroyed, remove ship from all it's parent lists
-                            # TODO: ship should be able to be removed from everywhere in one command (.destroy() on ship?)
-                            defending_ship._fleet.remove_ship(defending_ship)
-                            defending_ship._fleet.get_owner().remove_ship(defending_ship)
-                            defending_ships.remove(defending_ship)
-                            continue
+                        # hit shields, if healthy, hull if not
+                        defending_ship.shields_hit()
 
-    def get_possibility(self, percentage):
-        return randint(1, 100) <= percentage
+                    if not defending_ship.is_hull_intact():
+                        continue
+
+                    if not attacking_ship.get_warm_guns() > 0:
+                        break
 
     def get_critical_hit(self):
         return randint(1, 1000) <= CRITICAL_HIT
-
-    def get_natural_misfire(self):
-        return self.get_possibility(NATURAL_MISFIRE)
 
 
 class AttackException(Exception):
