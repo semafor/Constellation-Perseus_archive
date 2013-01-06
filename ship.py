@@ -255,10 +255,26 @@ class Ship(gameobject.GameObject):
         if __debug__:
             self.data_invariant()
 
-        guns_length = self.get_guns() - 1
-        gun = randint(0, guns_length)
+        available_gun_states = []
 
-        self.set_gun_state(gun, -100)
+        for k, v in self.temp_to_guns.items():
+            if (v > 0):
+                available_gun_states.append(k)
+
+        gun_to_destroy = randint(0, len(available_gun_states))
+
+        self.set_gun_state(gun_to_destroy, -100)
+
+        # guns_length = self.get_guns() - 1
+        # gun = randint(0, guns_length)
+
+        # temp = self.get_gun_state(gun)
+        # self.temp_to_guns[temp] -= 1
+        # if (-100 in self.temp_to_guns):
+        #     self.temp_to_guns[-100] += 1
+        # else:
+        #     self.temp_to_guns[-100] = 1
+        # self.set_gun_state(gun, -100)
 
         if __debug__:
             self.data_invariant()
