@@ -33,8 +33,11 @@ class TestAinVsAin(unittest.TestCase):
         a_diff = SHIPS - a_size
         b_diff = SHIPS - b_size
 
-        return "Force A:\t %d (lost %d)\nForce B:\t%d (lost %d)\n" %\
-            (a_size, a_diff, b_size, b_diff)
+        a_loss_prc = round(a_diff / (SHIPS / 100))
+        b_loss_prc = round(b_diff / (SHIPS / 100))
+
+        return "Force A:\t %d (lost %d%%)\nForce B:\t%d (lost %d%%)\n" %\
+            (a_size, a_loss_prc, b_size, b_loss_prc)
 
     def setUp(self):
         random.seed(0)

@@ -157,17 +157,6 @@ class Fleet():
         elif(criterion == SHIELDRESTORE):
             result = sorted(self.get_ships(), key=lambda ship: ship.shields_restore_time, reverse=reverse)
 
-        # for s in result:
-        #     print "Hull: %s" % str(s.get_hull())
-        #     print "Total guns: %s" % str(s.guns)
-        #     print "Warm guns: %s" % str(s.get_amount_of_warm_guns())
-        #     print "Total shields: %s" % str(s.get_shields())
-        #     print "Current shields: %s" % str(s.get_shields_health())
-        #     print "Gun warmup time: %s" % str(s.guns_warmup_time)
-        #     print "Shield restore time: %s" % str(s.shields_restore_time)
-        #     print "Class: %s" % str(s.get_name())
-        #     print "\n"
-
         return result
 
     def get_owner(self):
