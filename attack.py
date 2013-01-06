@@ -54,6 +54,7 @@ class Attack():
             attack_mode = attacking_fleet.get_attack_mode()
             coordination_mode = attacking_fleet.get_coordination_mode()
 
+            attacking_ships = attacking_fleet.get_ships()
             defending_ships = []
 
             # fetch ships in desired order
@@ -62,7 +63,17 @@ class Attack():
             elif(attack_mode == AGGRESSIVE):
                 defending_ships = defending_force.get_all_ships_ordered(CLOSETODESTRUCT)
 
-            for attacking_ship in attacking_fleet.get_ships():
+            # if timed attack, wait until TIMEDTHRESHOLD of guns are warm
+            if(coordination_mode == TIMED):
+                total_guns = attacking_fleet.get_guns()
+                warm_guns = attacking_fleet.get_warm_guns()
+
+                percentage_warm = warm_guns / (total_guns / 100)
+
+                if(round(percentage_warm) < TIMEDTHRESHOLD):
+                    continue
+
+            for attacking_ship in attacking_ships:
 
                 # no more defenders
                 if(len(defending_ships) == 0):
