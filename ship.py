@@ -239,6 +239,7 @@ class Ship(gameobject.GameObject):
         available_gun_temperatures = []
 
         for k, v in self.temp_to_guns.items():
+            if v:
                 available_gun_temperatures.append(k)
 
         random_gun_temperature = available_gun_temperatures[randint(0, len(available_gun_temperatures) - 1)]
@@ -289,27 +290,12 @@ class Ship(gameobject.GameObject):
         if __debug__:
             self.data_invariant()
 
-    def fire_gun(self, gun_index):
+    def fire_gun(self):
         """Set gun index to 0"""
         if __debug__:
             self.data_invariant()
 
-        assert self.guns_states[gun_index] >= self.guns_warm_temperature, \
-            "Cannot fire cold gun, index=" + str(gun_index) + ", temperature=" + str(self.guns_states[gun_index])
-
-        temp = self.guns_states[gun_index]
-        self.guns_states[gun_index] = 0
-
-        # if not absolutely cool
-        # add to cold guns
-        # subtract this gun from the temperature it was at
-        if (temp != 0):
-            if 0 in self.temp_to_guns:
-                self.temp_to_guns[0] += 1
-            else:
-                self.temp_to_guns[0] = 1
-
-            self.temp_to_guns[temp] -= 1
+        self.set_gun_temperature(self.guns_warm_temperature, 0)
 
         if __debug__:
             self.data_invariant()

@@ -37,7 +37,6 @@ class TestAinVsAin(unittest.TestCase):
             (a_size, a_diff, b_size, b_diff)
 
     def setUp(self):
-        print "Setting seed ... "
         random.seed(0)
         pass
 
