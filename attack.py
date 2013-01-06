@@ -70,14 +70,14 @@ class Attack():
 
                 for defending_ship in defending_ships:
 
-                    for attacking_gun_index in attacking_ship.get_indices_of_warm_guns():
+                    for gun in range(attacking_ship.get_warm_guns()):
 
                         if not defending_ship.is_hull_intact():
                             # if ship is destroyed, remove ship from all it's parent lists
                             # TODO: ship should be able to be removed from everywhere in one command (.destroy() on ship?)
                             continue
 
-                        attacking_ship.fire_gun(attacking_gun_index)
+                        attacking_ship.fire_gun()
 
                         # specified misfire, stop firing
                         if(self.get_possibility(miss_chance)):
