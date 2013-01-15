@@ -38,6 +38,10 @@ class Game():
 
         return game_object
 
+    def create_random_player(self, **kwargs):
+        kwargs["name"] = "player_%s" % str(uuid.uuid4())[:3]
+        return self.create_player(**kwargs)
+
     def create_player(self, name, **kwargs):
         """Return None if name is empty or already existing username else create a player object and return it."""
         if ((type("")) != type(name)):

@@ -428,22 +428,25 @@ class Console(cmd.Cmd):
             print "Failed to attack"
 
     def do_test(self, args):
-        player_a = self.game.create_player(name="a", allotropes=1000000)
+        player_a = self.game.create_random_player(allotropes=1000000)
         print "* new player %s (%s)" % (player_a.get_name(), player_a.get_id())
 
-        player_b = self.game.create_player(name="b", allotropes=100000)
+        player_b = self.game.create_random_player(allotropes=100000)
         print "* new player %s (%s)" % (player_b.get_name(), player_b.get_id())
 
-        self.do_player("a buy 100 ain")
-        self.do_player("a buy 100 beid")
-        self.do_player("a buy 10 canopus")
-        self.do_player("b buy 200 ain")
-        self.do_player("b buy 200 beid")
+        player_a_name = player_a.get_name()
+        player_b_name = player_b.get_name()
+
+        self.do_player("%s buy 100 ain" % player_a_name)
+        self.do_player("%s buy 100 beid" % player_a_name)
+        self.do_player("%s buy 10 canopus" % player_a_name)
+        self.do_player("%s buy 200 ain" % player_b_name)
+        self.do_player("%s buy 200 beid" % player_b_name)
 
         print player_a
         print player_b
 
-        self.do_player("a attack b 0")
+        self.do_player("%s attack %s 0" % (player_a_name, player_b_name))
         for i in range(10):
             self.do_tick("next")
 
