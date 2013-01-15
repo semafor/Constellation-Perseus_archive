@@ -137,12 +137,21 @@ class Game():
         return True
 
     def attack(self, *args):
+        """Return Mission which will result in an attack
+
+        The Mission will expose its Fleets, as hostile fleets, to the target Planetary when at destination
+        """
         return self.create_mission(mission.ATTACK, *args)
 
     def defend(self, *args):
+        """Return Mission which will result in defending a planetary
+
+        The Mission will expose its Fleets, as friendly fleets, to the target Planetary when at destination
+        """
         return self.create_mission(mission.DEFEND, *args)
 
     def create_mission(self, modus, initiator, target, fleet_index, target_stay):
+        """Create and return a Mission"""
 
         try:
             initiator.get_planetary()

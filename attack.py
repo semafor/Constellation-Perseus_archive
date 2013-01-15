@@ -10,26 +10,19 @@ NATURAL_MISFIRE = 5
 
 
 class Attack():
-    def __init__(self, attacking_force, defending_force):
+    """Class that lets one force attack another"""
+    def __init__(self, attacking_force, defending_force, location):
         self.attack_tick = 0
 
-        try:
-            attacking_force.get_fleets()
-        except:
-            raise AttackException("Attacking force not a Force: %s"\
-                % str(attacking_force))
-
-        try:
-            defending_force.get_fleets()
-        except:
-            raise AttackException("Defending force a Force: %s"\
-                % str(defending_force))
+        self.location = location
 
         self.attacking_force = attacking_force
         self.defending_force = defending_force
 
         self.all_ships = self.attacking_force.get_all_ships()\
             + self.defending_force.get_all_ships()
+
+        assert not self.data_invariant()
 
         for n, tick in enumerate(range(ATTACK_TICKS)):
 
@@ -46,8 +39,12 @@ class Attack():
             for ship in self.all_ships:
                 ship.attack_tick()
 
-    def force_vs_force(self, attacking_force, defending_force, miss_chance):
+            assert not self.data_invariant()
 
+        assert not self.data_invariant()
+
+    def force_vs_force(self, attacking_force, defending_force, miss_chance):
+        """Cycle through attacking ships and fire guns at defending ships"""
         # cycle through attacking fleets and execute their desired attack
         for attacking_fleet in attacking_force.get_fleets():
 
@@ -108,7 +105,30 @@ class Attack():
                     defending_ship.shields_hit()
 
     def get_critical_hit(self):
+        """Return True if the random number was less than CRITICAL_HIT"""
         return randint(1, 1000) <= CRITICAL_HIT
+
+    def data_invariant(self):
+        if not __debug__:
+            return None
+
+        try:
+            self.attacking_force.get_fleets()
+        except:
+            raise AttackException("Attacking force not a Force: %s"\
+                % str(self.attacking_force))
+
+        try:
+            self.defending_force.get_fleets()
+        except:
+            raise AttackException("Defending force a Force: %s"\
+                % str(self.defending_force))
+
+        try:
+            self.location.get_friendly_fleets()
+        except:
+            raise AttackException("Location not a planetary: %s"\
+                % str(self.location))
 
 
 class AttackException(Exception):

@@ -24,7 +24,10 @@ class TestAinVsAin(unittest.TestCase):
 
         flt.set_attack_mode(attack_mode)
 
-        return force.Force(flt)
+        frc = force.Force(flt)
+        frc._player = playr
+
+        return frc
 
     def _force_diff(self, a, b):
         a_size = len(a.get_all_ships())
@@ -48,9 +51,9 @@ class TestAinVsAin(unittest.TestCase):
         a = self._build_force("ain", SHIPS, "player_a", fleet.AGGRESSIVE)
         b = self._build_force("ain", SHIPS, "player_b", fleet.DEFENSIVE)
 
-        attack.Attack(a, b)
-        attack.Attack(a, b)
-        attack.Attack(a, b)
+        attack.Attack(a, b, b._player)
+        attack.Attack(a, b, b._player)
+        attack.Attack(a, b, b._player)
 
         print self._force_diff(a, b)
 
@@ -60,8 +63,8 @@ class TestAinVsAin(unittest.TestCase):
         a = self._build_force("beid", SHIPS, "player_c", fleet.AGGRESSIVE)
         b = self._build_force("beid", SHIPS, "player_d", fleet.DEFENSIVE)
 
-        attack.Attack(a, b)
-        attack.Attack(a, b)
+        attack.Attack(a, b, b._player)
+        attack.Attack(a, b, b._player)
 
         print self._force_diff(a, b)
 
@@ -71,9 +74,9 @@ class TestAinVsAin(unittest.TestCase):
         a = self._build_force("beid", SHIPS, "player_e", fleet.AGGRESSIVE)
         b = self._build_force("ain", SHIPS, "player_f", fleet.DEFENSIVE)
 
-        attack.Attack(a, b)
-        attack.Attack(a, b)
-        attack.Attack(a, b)
+        attack.Attack(a, b, b._player)
+        attack.Attack(a, b, b._player)
+        attack.Attack(a, b, b._player)
 
         print self._force_diff(a, b)
 
@@ -83,9 +86,9 @@ class TestAinVsAin(unittest.TestCase):
         a = self._build_force("ain", SHIPS, "player_g", fleet.AGGRESSIVE)
         b = self._build_force("beid", SHIPS, "player_h", fleet.DEFENSIVE)
 
-        attack.Attack(a, b)
-        attack.Attack(a, b)
-        attack.Attack(a, b)
+        attack.Attack(a, b, b._player)
+        attack.Attack(a, b, b._player)
+        attack.Attack(a, b, b._player)
         print self._force_diff(a, b)
 
 if __name__ == '__main__':

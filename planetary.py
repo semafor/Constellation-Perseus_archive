@@ -45,6 +45,12 @@ class Planetary(gameobject.GameObject):
     def register_friendly_fleet(self, fleet):
         self.friendly_fleets.append(fleet)
 
+    def get_hostile_fleets(self):
+        return self.hostile_fleets
+
+    def get_friendly_fleets(self):
+        return self.friendly_fleets
+
     def tick(self):
 
         if(self.hostile_fleets):
@@ -55,7 +61,7 @@ class Planetary(gameobject.GameObject):
                     self.register_friendly_fleet(fleet)
 
             self.current_attack = attack.Attack(force.Force(self.hostile_fleets),\
-                force.Force(self.friendly_fleets))
+                force.Force(self.friendly_fleets), self)
 
         self.post_tick_cleanup()
 
