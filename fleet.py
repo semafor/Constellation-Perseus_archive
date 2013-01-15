@@ -25,11 +25,6 @@ HULL = "hull"
 class Fleet():
     def __init__(self, owner=None):
 
-        try:
-            owner.get_planetary()
-        except:
-            raise ValueError("Fleet needs owner: %s" % str(owner))
-
         self.owner = owner
         self.ships = []
         self.mission = None
@@ -47,12 +42,10 @@ class Fleet():
         mode, "Aggressive", aims to maximize the number of killed enemy ships.  Every ship in the fleet will try to take out a
         ship if its shields are down or hull damaged.  The "Defensive" mode is a good defending strategy."""
 
-        if __debug__:
-            self.data_invariant()
+        assert not self.data_invariant()
 
     def assign_ships(self, ships):
-        if __debug__:
-            self.data_invariant()
+        assert not self.data_invariant()
 
         if(type(ships) != type([])):
             raise ValueError("Ships need to come as list, not %s" % str(ships))
@@ -62,12 +55,10 @@ class Fleet():
         for ship in ships:
             self.add_ship(ship)
 
-        if __debug__:
-            self.data_invariant()
+        assert not self.data_invariant()
 
     def append_ships(self, ships):
-        if __debug__:
-            self.data_invariant()
+        assert not self.data_invariant()
 
         if(type(ships) != type([])):
             raise ValueError("Ships need to come as list, not %s" % str(ships))
@@ -75,34 +66,28 @@ class Fleet():
         for ship in ships:
             self.add_ship(ship)
 
-        if __debug__:
-            self.data_invariant()
+        assert not self.data_invariant()
 
     def add_ship(self, ship):
-        if __debug__:
-            self.data_invariant()
+        assert not self.data_invariant()
 
         ship._fleet = self
         self.ships.append(ship)
 
-        if __debug__:
-            self.data_invariant()
+        assert not self.data_invariant()
 
     def remove_ship(self, ship):
 
         self.ships.remove(ship)
 
-        if __debug__:
-            self.data_invariant()
+        assert not self.data_invariant()
 
     def set_mission(self, mission):
-        if __debug__:
-            self.data_invariant()
+        assert not self.data_invariant()
 
         self.mission = mission
 
-        if __debug__:
-            self.data_invariant()
+        assert not self.data_invariant()
 
     def get_mission(self):
         return self.mission
@@ -177,38 +162,32 @@ class Fleet():
         return self.owner
 
     def set_coordination_mode(self, mode):
-        if __debug__:
-            self.data_invariant()
+        assert not self.data_invariant()
 
         self.coordination_mode = mode
 
-        if __debug__:
-            self.data_invariant()
+        assert not self.data_invariant()
 
     def get_coordination_mode(self):
         return self.coordination_mode
 
     def set_attack_mode(self, mode):
-        if __debug__:
-            self.data_invariant()
+        assert not self.data_invariant()
 
         self.attack_mode = mode
 
-        if __debug__:
-            self.data_invariant()
+        assert not self.data_invariant()
 
     def get_attack_mode(self):
         return self.attack_mode
 
     def tick(self):
-        if __debug__:
-            self.data_invariant()
+        assert not self.data_invariant()
 
         if(self.mission):
             self.mission.tick()
 
-        if __debug__:
-            self.data_invariant()
+        assert not self.data_invariant()
 
     def data_invariant(self):
         if not __debug__:
@@ -216,6 +195,11 @@ class Fleet():
 
         if(type(self.ships) != type([])):
             raise ValueError("Ships not a list %s" % str(self.ships))
+
+        try:
+            self.get_owner().get_planetary()
+        except:
+            raise FleetOwnerError("Fleet needs owner: %s" % str(self.get_owner()))
 
         # check ships in fleet
         # for ship in self.ships:
@@ -233,17 +217,33 @@ class Fleet():
             try:
                 mission.get_stage()
             except:
-                raise FleetException("Bad fleet mission %s"\
+                raise FleetMissionError("Bad fleet mission %s"\
                     % str(mission.get_stage()))
 
         if(self.coordination_mode != ATWILL and self.coordination_mode != TIMED):
-            raise ValueError("coordination_mode not valid: %s" % str(self.coordination_mode))
+            raise FleetModeError("coordination_mode not valid: %s" % str(self.coordination_mode))
 
         if(self.attack_mode != AGGRESSIVE and self.attack_mode != DEFENSIVE):
-            raise ValueError("attack_mode not valid: %s" % str(self.attack_mode))
+            raise FleetModeError("attack_mode not valid: %s" % str(self.attack_mode))
 
 
-class FleetException(Exception):
+class FleetOwnerError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class FleetMissionError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class FleetModeError(Exception):
     def __init__(self, value):
         self.value = value
 

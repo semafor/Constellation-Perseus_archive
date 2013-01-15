@@ -6,6 +6,7 @@ import force
 class Planetary(gameobject.GameObject):
     def __str__(self):
         """Return string representation of Planetary object."""
+
         if self.owner:
             return "Planetary system: " + self.name + ", owned by " + self.owner.name
         else:

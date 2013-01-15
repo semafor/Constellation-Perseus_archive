@@ -19,7 +19,7 @@ class Force():
 
         for fleet in fleets:
             if(fleets.count(fleet) > 1):
-                raise ValueError("fleet %s appears %d times"\
+                raise DuplicateFleetError("fleet %s appears %d times"\
                     % (str(fleet), fleets.count(fleet)))
 
         self.fleets = fleets
@@ -63,3 +63,11 @@ class Force():
         for index, fleet in enumerate(self.get_fleets()[:]):
             if(len(fleet.get_ships()) == 0):
                 self.remove_fleet(fleet)
+
+
+class DuplicateFleetError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)

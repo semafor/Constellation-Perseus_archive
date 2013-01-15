@@ -24,7 +24,7 @@ class Game():
         """
 
         if not what:
-            raise GameException("cannot create %s " % str(what))
+            raise TypeError("cannot create %s " % str(what))
 
         game_object = what(**kwargs)
 
@@ -99,10 +99,10 @@ class Game():
         ships = []
 
         if not ship_enum:
-            raise ValueError("cannot buy ship of %s type" % str(ship_enum))
+            raise ShipTypeError("cannot buy ship of %s type" % str(ship_enum))
 
         if not buyer:
-            raise ValueError("buyer cannot be %s " % str(buyer))
+            raise PlayerError("buyer cannot be %s " % str(buyer))
 
         if not type(amount) == type(1):
             raise ValueError("amount must be an int: %s" % str(amount))
@@ -111,7 +111,7 @@ class Game():
             raise ValueError("amount must not be negative: %s" % str(amount))
 
         if buyer.get_fleet(fleet_index).get_mission():
-            raise GameException("Cannot buy ships for absent fleet")
+            raise FleetAbsentError("Cannot buy ships for absent fleet")
 
         try:
             available_ships[ship_enum]
@@ -160,30 +160,32 @@ class Game():
         try:
             initiator.get_planetary()
         except:
-            raise ValueError("Initiator needs to be Player, not %s" % str(initiator))
+            raise PlayerError("Initiator invalid: %s" % str(initiator))
 
         try:
             target.get_planetary()
         except:
-            raise ValueError("Target needs to be Player, not %s" % str(target))
+            raise PlayerError("Target invalid: %s" % str(target))
 
-        if(type(fleet_index) != type(1)):
-            raise ValueError("Initiator must specify fleet, other than %s" % str(fleet_index))
+        try:
+            initiator.get_fleet(fleet_index)
+        except:
+            raise FleetAbsentError("Fleet %s cannot accept new mission" % str(fleet_index))
 
         if(type(target_stay) != type(1)):
-            raise ValueError("Specify for how long mission will last, not %s" % str(target_stay))
+            raise ValueError("Mission stay length invalid: %s" % str(target_stay))
 
         if(len(initiator.get_fleet(fleet_index).get_ships()) == 0):
-            raise GameException("Initiator have no ships in fleet %d" % fleet_index)
+            raise FleetEmptyError("Fleet %d empty" % fleet_index)
             return False
 
         if(initiator == target):
-            raise GameException("Initiator cannot target self")
+            raise AttackNotAllowedError("Initiator cannot target self")
 
         fleet = initiator.get_fleet(fleet_index)
 
         if(fleet.get_mission()):
-            raise GameException("Fleet already on mission")
+            raise FleetAbsentError("Fleet already on mission")
 
         m = mission.Mission(modus, initiator, target, target_stay, fleet)
         fleet.set_mission(m)
@@ -268,7 +270,47 @@ class Tick():
         return self.current_tick
 
 
-class GameException(Exception):
+class GameError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class ShipTypeError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class FleetAbsentError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class PlayerError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class FleetEmptyError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class AttackNotAllowedError(Exception):
     def __init__(self, value):
         self.value = value
 

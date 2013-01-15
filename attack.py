@@ -115,23 +115,43 @@ class Attack():
         try:
             self.attacking_force.get_fleets()
         except:
-            raise AttackException("Attacking force not a Force: %s"\
+            raise ForceError("Attacking force not a Force: %s"\
                 % str(self.attacking_force))
 
         try:
             self.defending_force.get_fleets()
         except:
-            raise AttackException("Defending force a Force: %s"\
+            raise ForceError("Defending force a Force: %s"\
                 % str(self.defending_force))
 
         try:
             self.location.get_friendly_fleets()
         except:
-            raise AttackException("Location not a planetary: %s"\
+            raise LocationError("Location not a planetary: %s"\
                 % str(self.location))
 
+        for fleet in self.attacking_force.get_fleets():
+            if self.defending_force.get_fleets().count(fleet):
+                raise FleetBothAttackerAndDefenderError("Attacking fleet %s is also defending" % str(fleet))
 
-class AttackException(Exception):
+
+class ForceError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class LocationError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class FleetBothAttackerAndDefenderError(Exception):
     def __init__(self, value):
         self.value = value
 

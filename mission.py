@@ -14,30 +14,6 @@ ABORTED = "aborted"
 class Mission():
     def __init__(self, mission_type, player, target, stay_time, fleet):
 
-        try:
-            player.get_planetary()
-        except:
-            raise ValueError("Player needs to be Player, not %s" % str(player))
-
-        try:
-            target.get_planetary()
-        except:
-            raise ValueError("Target needs to be Player, not %s" % str(target))
-
-        if(mission_type != ATTACK) and (mission_type != DEFEND):
-            raise ValueError("mission_type needs to be %s or %s, not %s"\
-                % (ATTACK, DEFEND, mission_type))
-
-        if not stay_time:
-            raise ValueError("need to %s n ticks, not %s"\
-                % (mission_type, str(stay_time)))
-
-        try:
-            fleet.get_mission()
-        except:
-            raise ValueError("Bad given fleet: %s"\
-                % str(fleet))
-
         self.player = player
         self.fleet = fleet
         self.target = target
@@ -219,6 +195,30 @@ class Mission():
         if not __debug__:
             return None
 
+        try:
+            self.player.get_planetary()
+        except:
+            raise PlayerError("Player invalid: %s" % str(self.player))
+
+        try:
+            self.target.get_planetary()
+        except:
+            raise PlayerError("Target invalid: %s" % str(self.target))
+
+        if(self.mission_type != ATTACK) and (self.mission_type != DEFEND):
+            raise ModeError("mission_type needs to be %s or %s, not %s"\
+                % (ATTACK, DEFEND, self.mission_type))
+
+        if not self.stay_time:
+            raise ValueError("Stay time invalid: %s"\
+                % str(self.stay_time))
+
+        try:
+            self.fleet.get_mission()
+        except:
+            raise FleetError("Invalid fleet: %s"\
+                % str(self.fleet))
+
         # stage
         if not type(self.stage) == type(""):
             raise ValueError("Stage is not a a str: " % str(self.stage))
@@ -264,6 +264,38 @@ class Mission():
             self.target.get_planetary()
         except:
             raise ValueError("Target is not a Player: %s" % str(self.target))
+
+
+class MissionException(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class PlayerError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class ModeError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class FleetError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
 
 
 class MissionException(Exception):
