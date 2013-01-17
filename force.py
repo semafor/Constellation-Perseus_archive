@@ -1,31 +1,21 @@
-from random import shuffle
-
-
 class Force():
+    """Represents a list of fleets
+    """
     def __init__(self, fleets):
 
+        # convert single fleet to list
         try:
             if(fleets.get_ships()):
                 fleets = [fleets]
         except:
             pass
 
-        try:
-            for fleet in fleets:
-                fleet.get_ships()
-        except:
-            raise TypeError("fleets is not a list of fleets: %s"\
-                % str(fleets))
-
-        for fleet in fleets:
-            if(fleets.count(fleet) > 1):
-                raise DuplicateFleetError("fleet %s appears %d times"\
-                    % (str(fleet), fleets.count(fleet)))
-
         self.fleets = fleets
 
         # remove fleets without ships
         self.remove_empty_fleets()
+
+        assert not self._data_invariant()
 
     def get_fleets(self):
         return self.fleets
@@ -49,6 +39,7 @@ class Force():
         guns = 0
         for ship in self.get_all_ships():
 
+            # TODO: count on fleet to sort this out
             if not ship.is_hull_intact():
                 raise Exception("Broken ship was included in force")
 
@@ -57,17 +48,32 @@ class Force():
         return guns
 
     def remove_fleet(self, fleet):
+        assert not self._data_invariant()
+
         self.fleets.remove(fleet)
 
+        assert not self._data_invariant()
+
     def remove_empty_fleets(self):
+        assert not self._data_invariant()
+
         for index, fleet in enumerate(self.get_fleets()[:]):
             if(len(fleet.get_ships()) == 0):
                 self.remove_fleet(fleet)
 
+        assert not self._data_invariant()
 
-class DuplicateFleetError(Exception):
-    def __init__(self, value):
-        self.value = value
+    def _data_invariant(self):
+        if not __debug__:
+            return None
 
-    def __str__(self):
-        return repr(self.value)
+        try:
+            for fleet in self.fleets:
+                fleet.get_ships()
+        except:
+            raise
+
+        for fleet in self.fleets:
+            if(self.fleets.count(fleet) > 1):
+                raise AssertionError("fleet %s not unique (appeas %d times)"\
+                    % (str(fleet), self.fleets.count(fleet)))

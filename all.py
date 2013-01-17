@@ -258,11 +258,8 @@ class Console(cmd.Cmd):
                 elif(mode == "defend"):
                     mission = self.game.defend(player, target, fleet_index, 3)
 
-            except game.GameException as e:
-                print "Failed to attack: %s" % e
-                return
             except Exception as e:
-                print "Unknown failure: %s" % e
+                print "Failed to attack: %s" % e
                 print _usage
                 return
 

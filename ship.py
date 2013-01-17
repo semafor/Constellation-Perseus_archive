@@ -4,6 +4,16 @@ from random import randint
 
 
 class Ship(gameobject.GameObject):
+    """Represents a ship
+
+    Exceptions:
+        ShipDestroyedMultipleTimesError
+            if something wants to kill a ship twice or >
+        ShipClassDoesNotExistError
+            invalid class
+        DestroyedShipStillInFleetError
+            if a destroyed ship has not been removed from fleet
+    """
     def __str__(self):
         """Return string representation of Ship object."""
         return "Ship: \t %s (%s), hull: %s" % (str(self.name), str(self.ship_class), str(self.hull))
@@ -43,10 +53,7 @@ class Ship(gameobject.GameObject):
         self.current_shields_health = shields
 
         if ship_class == 0 or ship_class > len(CLASSES):
-            raise ShipException("ship_class %s is N/A " % str(ship_class))
-
-        if not price:
-            raise ShipException("price cannot be %s" % str(price))
+            raise ShipClassDoesNotExistError("ship_class %s is N/A " % str(ship_class))
 
         self.display_name = "%s, a ship, class %d, costing %d" \
             % (self.name, self.ship_class, self.price)
@@ -326,7 +333,7 @@ class Ship(gameobject.GameObject):
 
     def destroy(self):
         if not self._fleet:
-            raise ShipException("Tried to destroy ship twice")
+            raise ShipDestroyedMultipleTimesError("Tried to destroy ship twice")
 
         self._fleet.ships.remove(self)
         self._fleet = None
@@ -387,60 +394,60 @@ class Ship(gameobject.GameObject):
         # print wguns
 
         if(type(self.name) != type("")):
-            raise ValueError("Name %s not a string" % str(self.name))
+            raise AssertionError("Name %s not a string" % str(self.name))
 
         if(type(self.ship_class) != type(1)):
-            raise ValueError("Ship class %s not an int" % str(self.ship_class))
+            raise AssertionError("Ship class %s not an int" % str(self.ship_class))
 
         if(type(self.evade) != type(1)):
-            raise ValueError("Evade %s not an int" % str(self.evade))
+            raise AssertionError("Evade %s not an int" % str(self.evade))
 
         # hull
         if(type(self.hull) != type(1)):
-            raise ValueError("Hull %s not an int" % str(self.hull))
+            raise AssertionError("Hull %s not an int" % str(self.hull))
 
         if(self.hull < 0):
-            raise ValueError("Hull lt 0: %s" % str(self.hull))
+            raise AssertionError("Hull lt 0: %s" % str(self.hull))
 
         if not self.is_hull_intact() and self._fleet:
-            raise ShipException("Ship still in fleet while destroyed")
+            raise DestroyedShipStillInFleetError("Ship still in fleet while destroyed")
 
         # price
         if(type(self.price) != type(1)):
-            raise ValueError("Price %s not an int" % str(self.price))
+            raise AssertionError("Price %s not an int" % str(self.price))
 
         # guns
         if(type(self.guns) != type(1)):
-            raise ValueError("Guns %s not an int" % str(self.guns))
+            raise AssertionError("Guns %s not an int" % str(self.guns))
 
         if(self.guns != self._original_guns):
-            raise ValueError("Amount of guns deviates: %s" % str(self.guns))
+            raise AssertionError("Amount of guns deviates: %s" % str(self.guns))
 
         # guns warmup
         if(type(self.guns_warm_temperature) != type(1)):
-            raise ValueError("Warmup %s not an int" % str(self.guns_warm_temperature))
+            raise AssertionError("Warmup %s not an int" % str(self.guns_warm_temperature))
 
         if (type(self.temp_to_guns) != type({})):
-            raise ValueError("temp_to_guns not dict")
+            raise AssertionError("temp_to_guns not dict")
 
         for k, v in self.temp_to_guns.items():
             if k > self.guns_warm_temperature:
-                raise ValueError("a temperature in temp_to_guns was too warm: %s" % str(k))
+                raise AssertionError("a temperature in temp_to_guns was too warm: %s" % str(k))
 
         # shields
         if(type(self.shields) != type(1)):
-            raise ValueError("Shields %s not an int" % str(self.shields))
+            raise AssertionError("Shields %s not an int" % str(self.shields))
 
         # shields restore
         if(type(self.current_shields_health) != type(1)):
-            raise ValueError("Current shield health %s not an int"\
+            raise AssertionError("Current shield health %s not an int"\
                 % str(self.current_shields_health))
         if(self.shields < self.current_shields_health):
-            raise ValueError("Current shield health %s is too high"\
+            raise AssertionError("Current shield health %s is too high"\
                 % str(self.current_shields_health))
 
         if(self.shields_restore_time < 1):
-            raise ValueError("shields_restore_time less than 1: %s"\
+            raise AssertionError("shields_restore_time less than 1: %s"\
                 % str(self.shields_restore_time))
 
 TYPES = {
@@ -502,7 +509,23 @@ CLASSES = [
 ]
 
 
-class ShipException(Exception):
+class ShipClassDoesNotExistError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class DestroyedShipStillInFleetError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class ShipDestroyedMultipleTimesError(Exception):
     def __init__(self, value):
         self.value = value
 

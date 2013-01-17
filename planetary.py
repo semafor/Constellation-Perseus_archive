@@ -4,6 +4,12 @@ import force
 
 
 class Planetary(gameobject.GameObject):
+    """Represents a planetary, a star with planetary bodies surrounding it
+
+    Exceptions:
+        PlanetaryNameError
+            name required, raised if name is empty
+    """
     def __str__(self):
         """Return string representation of Planetary object."""
 
@@ -17,7 +23,7 @@ class Planetary(gameobject.GameObject):
                 defense_system=None, active=True):
 
         if not name:
-            raise PlanetaryException("Needs name")
+            raise PlanetaryNameError("Needs name")
 
         self.name = name
         self.owner = owner
@@ -72,7 +78,7 @@ class Planetary(gameobject.GameObject):
         self.current_attack = None
 
 
-class PlanetaryException(Exception):
+class PlanetaryNameError(Exception):
     def __init__(self, value):
         self.value = value
 

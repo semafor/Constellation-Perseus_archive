@@ -23,6 +23,13 @@ HULL = "hull"
 
 
 class Fleet():
+    """Represents a list of ships.
+
+        - Fleet can be on a Mission
+        - If fleet is in a Attack which fires on Planetary Shields, it is given resources
+            which in turn is passed on to the mission
+
+    """
     def __init__(self, owner=None):
 
         self.owner = owner
@@ -194,12 +201,12 @@ class Fleet():
             return None
 
         if(type(self.ships) != type([])):
-            raise ValueError("Ships not a list %s" % str(self.ships))
+            raise AssertionError("Ships not a list %s" % str(self.ships))
 
         try:
             self.get_owner().get_planetary()
         except:
-            raise FleetOwnerError("Fleet needs owner: %s" % str(self.get_owner()))
+            raise
 
         # check ships in fleet
         # for ship in self.ships:
@@ -217,35 +224,10 @@ class Fleet():
             try:
                 mission.get_stage()
             except:
-                raise FleetMissionError("Bad fleet mission %s"\
-                    % str(mission.get_stage()))
+                raise
 
         if(self.coordination_mode != ATWILL and self.coordination_mode != TIMED):
-            raise FleetModeError("coordination_mode not valid: %s" % str(self.coordination_mode))
+            raise AssertionError("coordination_mode not valid: %s" % str(self.coordination_mode))
 
         if(self.attack_mode != AGGRESSIVE and self.attack_mode != DEFENSIVE):
-            raise FleetModeError("attack_mode not valid: %s" % str(self.attack_mode))
-
-
-class FleetOwnerError(Exception):
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return repr(self.value)
-
-
-class FleetMissionError(Exception):
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return repr(self.value)
-
-
-class FleetModeError(Exception):
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return repr(self.value)
+            raise AssertionError("attack_mode not valid: %s" % str(self.attack_mode))

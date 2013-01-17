@@ -8,6 +8,11 @@ import ship
 
 
 class Game():
+    """Represents the game
+
+    Exceptions:
+        TODO: make sane list of exceptions. current one is a bit insane
+    """
     def __init__(self):
         self.game_object_by_uuid = {}
         self.game_object_by_game_object = {}

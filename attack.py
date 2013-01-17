@@ -10,7 +10,14 @@ NATURAL_MISFIRE = 5
 
 
 class Attack():
-    """Class that lets one force attack another"""
+    """Class that lets one force attack another
+
+    - This will reduce attacking and/or defending fleets
+
+    Exceptions:
+        FleetBothAttackerAndDefenderError
+            When a fleet appears in both defence and offence
+    """
     def __init__(self, attacking_force, defending_force, location):
         self.attack_tick = 0
 
@@ -115,40 +122,21 @@ class Attack():
         try:
             self.attacking_force.get_fleets()
         except:
-            raise ForceError("Attacking force not a Force: %s"\
-                % str(self.attacking_force))
+            raise
 
         try:
             self.defending_force.get_fleets()
         except:
-            raise ForceError("Defending force a Force: %s"\
-                % str(self.defending_force))
+            raise
 
         try:
             self.location.get_friendly_fleets()
         except:
-            raise LocationError("Location not a planetary: %s"\
-                % str(self.location))
+            raise
 
         for fleet in self.attacking_force.get_fleets():
             if self.defending_force.get_fleets().count(fleet):
                 raise FleetBothAttackerAndDefenderError("Attacking fleet %s is also defending" % str(fleet))
-
-
-class ForceError(Exception):
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return repr(self.value)
-
-
-class LocationError(Exception):
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return repr(self.value)
 
 
 class FleetBothAttackerAndDefenderError(Exception):
