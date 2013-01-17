@@ -14,9 +14,12 @@ class Ship(gameobject.GameObject):
         DestroyedShipStillInFleetError
             if a destroyed ship has not been removed from fleet
     """
+    def __repr__(self):
+        return "Ship"
+
     def __str__(self):
         """Return string representation of Ship object."""
-        return "Ship: \t %s (%s), hull: %s" % (str(self.name), str(self.ship_class), str(self.hull))
+        return "%s: \t %s (%s), hull: %s" % (self, self.name, str(self.ship_class), str(self.hull))
 
     def __init__(self, name=None, ship_class=1, price=0,
 

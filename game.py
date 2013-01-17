@@ -1,10 +1,10 @@
 import uuid
-import gameobject
 import mission
-import attack
 import player
 import planetary
 import ship
+from galaxy import Galaxy
+from planetary_name_generator import generate_name
 
 
 class Game():
@@ -19,6 +19,7 @@ class Game():
         self.player_by_name = {}
         self.planetary_by_name = {}
         self.tick = Tick()
+        self.galaxy = Galaxy()
 
     def create(self, what, **kwargs):
         """Return a GameObject.
@@ -59,7 +60,16 @@ class Game():
             return None
 
         kwargs["name"] = name
-        planetary_name = "%s's planetary" % name
+
+        # planetary
+        try:
+            planetary_name = kwargs["planetary_name"]
+        except:
+            planetary_name = None
+
+        if not planetary_name:
+            planetary_name = generate_name()
+
         kwargs["planetary"] = self.create_planetary(name=planetary_name)
 
         p = self.create(player.Player, **kwargs)
@@ -86,6 +96,8 @@ class Game():
         p = self.create(planetary.Planetary, **kwargs)
 
         self.planetary_by_name[name] = p
+
+        self.galaxy.add_body(p)
 
         return p
 
