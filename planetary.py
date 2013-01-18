@@ -10,6 +10,9 @@ class Planetary(Body):
     Exceptions:
         PlanetaryNameError
             name required, raised if name is empty
+        CriterionTypeUnknownError
+        CriterionUnmetError
+            If system is uninstallable due to unmet criteria
     """
     def __repr__(self):
         return "Planetary System"
@@ -68,12 +71,63 @@ class Planetary(Body):
     def get_installed_systems(self):
         return self.systems
 
-    def get_installable_systems(self):
-        """Return installable systems"""
-        systems = {
+    def can_install_system(self, identifier):
+        systems = self.get_available_systems()
+
+        try:
+            system = systems[identifier]
+        except:
+            raise
+
+        try:
+            self.is_all_system_criteria_met(system.criteria)
+        except:
+            raise
+
+        return True
+
+    def get_available_systems(self):
+        """Return available systems"""
+        return {
             wormhole_radar.WormholeRadar.identifier: wormhole_radar.WormholeRadar
         }
-        return systems
+
+    def is_system_criterion_met(self, criterion):
+        """Return True if criterion is met"""
+        met = False
+        player = self.get_owner()
+
+        if(criterion["type"] == "allotropes"):
+
+            if(player.get_allotropes() >= criterion["value"]):
+                met = True
+            else:
+                raise CriterionUnmetError("Not enough allotropes")
+
+        elif(criterion["type"] == "workforce"):
+            if(player.get_workforce() >= criterion["value"]):
+                met = True
+            else:
+                raise CriterionUnmetError("Not enough workforce")
+
+        elif(criterion["type"] == "stellar_class"):
+            if(self.star_class >= criterion["value"]):
+                met = True
+            else:
+                raise CriterionUnmetError("Stellar class too low")
+
+        else:
+            raise CriterionTypeUnknownError("Unknown criterion type %s" % str(criterion["type"]))
+
+        return met
+
+    def is_all_system_criteria_met(self, criteria):
+        met = True
+        for criterion in criteria:
+            if not self.is_system_criterion_met(criterion):
+                met = False
+
+        return met
 
     def tick(self, wormholes=[]):
 
@@ -106,3 +160,20 @@ class PlanetaryNameError(Exception):
 
     def __str__(self):
         return repr(self.value)
+
+
+class CriterionTypeUnknownError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class CriterionUnmetError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+

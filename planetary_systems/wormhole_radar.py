@@ -12,6 +12,12 @@ class WormholeRadar(PlanetarySystem):
 
     """
     identifier = "wormholeradar"
+    criteria = [
+        {
+            "type": "allotropes",
+            "value": 100
+        }
+    ]
 
     def __repr__(self):
         return "Wormhole Radar"

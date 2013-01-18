@@ -1,6 +1,7 @@
 class PlanetarySystem():
 
     identifier = "genericsystem"
+    criteria = []
 
     def __repr__(self):
         return "Planetary System"

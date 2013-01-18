@@ -102,15 +102,14 @@ class Game():
         return p
 
     def create_planetary_system(self, identifier, player):
-        """Return a system matching the identifier"""
-        installable_systems = player.get_planetary().get_installable_systems()
+        """Return a system matching the identifier, raises error if not"""
         system = None
 
         try:
-            system = installable_systems[identifier]()
+            player.get_planetary().can_install_system(identifier)
+            system = player.get_planetary().get_available_systems()[identifier]()
         except:
-            print "Failed to create system"
-            pass
+            raise
 
         return system
 

@@ -350,11 +350,17 @@ class Console(cmd.Cmd):
             system_identifier = args[3]
 
             if(system_command == "install"):
+                system = None
 
-                system = self.game.create_planetary_system(system_identifier, player)
+                try:
+                    system = self.game.create_planetary_system(system_identifier, player)
+                except Exception as e:
+                    print "Cannot create %s due to unmet criterion %s" % (system_identifier, e)
+                    system = None
 
                 if not system:
                     print "Failed to create system %s" % system_identifier
+                    return
                 else:
                     print "Created system %s" % system_identifier
 
@@ -562,6 +568,12 @@ class Console(cmd.Cmd):
 
         p = self.game.create_random_player()
         print "* new player %s (%s)" % (p.get_name(), p.get_id())
+
+        self.do_player("%s systems install wormholeradar" % p.get_name())
+
+        # not enough allotropes
+        self.do_player("%s add 100" % p.get_name())
+        print "* added some allotropes"
 
         self.do_player("%s systems install wormholeradar" % p.get_name())
 
