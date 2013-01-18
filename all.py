@@ -309,7 +309,7 @@ class Console(cmd.Cmd):
                 try:
                     system = self.game.create_planetary_system(system_identifier, player)
                 except Exception as e:
-                    print "Cannot create %s due to unmet criterion %s" % (system_identifier, e)
+                    print "Cannot create %s due to %s" % (system_identifier, e)
                     system = None
 
                 if not system:
@@ -529,6 +529,8 @@ class Console(cmd.Cmd):
         self.do_player("%s add 100" % p.get_name())
         print "* added some allotropes"
 
+        self.do_player("%s st" % p.get_name())
+
         self.do_player("%s systems install wormholeradar" % p.get_name())
 
         self.do_player("%s systems status wormholeradar" % p.get_name())
@@ -540,6 +542,8 @@ class Console(cmd.Cmd):
         self.do_player("%s systems install wormholeradar" % p.get_name())
 
         self.do_player("%s systems status wormholeradar" % p.get_name())
+
+        self.do_player("%s st" % p.get_name())
 
         print "\n=========\nEnd of systems testing\n=========\n"
 

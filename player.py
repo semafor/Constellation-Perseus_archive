@@ -1,6 +1,6 @@
 import fleet
-
 import gameobject
+import player_workforce
 
 from mission import DEFAULT_TRAVEL_TIME
 
@@ -45,7 +45,9 @@ class Player(gameobject.GameObject):
 
         self.name = name
         self.allotropes = allotropes
-        self.workforce = workforce
+
+        self.workforce = player_workforce.PlayerWorkforce(self, workforce)
+
         self.planetary = planetary
 
         self.fleets = [
@@ -55,7 +57,7 @@ class Player(gameobject.GameObject):
         ]
 
         self.display_name = "%s, a stellar commander. Workforce: %d" \
-            % (self.name, self.workforce)
+            % (self.name, self.workforce.get_size())
 
     def get_fleet(self, index):
         return self.fleets[index]
@@ -138,7 +140,90 @@ class Player(gameobject.GameObject):
         return total
 
     def get_allotropes_per_tick(self):
-        return len(self.get_ships()) + self.get_workforce() * 100
+        return len(self.get_ships()) + self.get_workforce().get_size() * 100
+
+    def meets_criteria(self, criteria):
+        """Return True if player has stuff asked for, False if not"""
+        met = True
+        for criterion in criteria:
+            if not self.meets_criterion(criterion):
+                met = False
+
+        return met
+
+    def meets_criterion(self, criterion):
+        """Return True if criterion is met"""
+        # TODO: why have false/true if it raises exception
+        met = False
+
+        if(criterion["type"] == "stellar_class"):
+            if(self.get_planetary().stellar_class >= criterion["value"]):
+                met = True
+            else:
+                raise CriterionUnmetError("Stellar class too low")
+
+        else:
+            raise CriterionTypeUnknownError("Unknown criterion type %s" % str(criterion["type"]))
+
+        return met
+
+    def can_afford_costs(self, costs):
+        met = True
+        for cost in costs:
+            if not self.can_afford_cost(cost):
+                met = False
+
+        return met
+
+    def can_afford_cost(self, cost):
+        # TODO: why have false/true if it raises exception
+        met = False
+
+        if(cost["type"] == "allotropes"):
+
+            if(self.get_allotropes() >= cost["value"]):
+                met = True
+            else:
+                raise CriterionUnmetError("Not enough allotropes")
+
+        elif(cost["type"] == "free_workforce"):
+            if(self.get_workforce().get_free() >= cost["value"]):
+                met = True
+            else:
+                raise CriterionUnmetError("Not enough workforce")
+
+        else:
+            raise CriterionTypeUnknownError("Unknown cost type %s" % cost["type"])
+
+        return met
+
+    def apply_costs(self, costs):
+        try:
+            self.can_afford_costs(costs)
+        except:
+            raise
+
+        for cost in costs:
+            # apply cost
+            if(cost["type"] == "allotropes"):
+                self.set_allotropes(self.get_allotropes() - cost["value"])
+
+            elif(cost["type"] == "free_workforce"):
+                self.get_workforce().use_workforce(cost["value"])
+
+            else:
+                raise CriterionTypeUnknownError("Unknown cost type %s" % cost["type"])
+
+        return True
+
+    def revert_cost(self, costs):
+        for cost in costs:
+            # apply cost
+            if(cost["type"] == "allotropes"):
+                self.set_allotropes(self.get_allotropes() + cost["value"])
+
+            elif(cost["type"] == "free_workforce"):
+                self.get_workforce().free_workforce(cost["value"])
 
     def tick(self):
         assert not self._data_invariant()
@@ -189,6 +274,22 @@ class Player(gameobject.GameObject):
 
 
 class PlayerNeedsNameError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class CriterionTypeUnknownError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class CriterionUnmetError(Exception):
     def __init__(self, value):
         self.value = value
 

@@ -2,6 +2,7 @@ class PlanetarySystem():
 
     identifier = "genericsystem"
     criteria = []
+    costs = []
 
     def __repr__(self):
         return "Planetary System"

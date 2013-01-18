@@ -102,12 +102,16 @@ class Game():
         return p
 
     def create_planetary_system(self, identifier, player):
-        """Return a system matching the identifier, raises error if not"""
-        system = None
+        """Return a system to be installed matching the identifier, raises error if not"""
+        try:
+            system = player.get_planetary().get_available_systems()[identifier]()
+            player.meets_criteria(system.criteria)
+            player.can_afford_costs(system.costs)
+        except:
+            raise
 
         try:
-            player.get_planetary().can_install_system(identifier)
-            system = player.get_planetary().get_available_systems()[identifier]()
+            player.apply_costs(system.costs)
         except:
             raise
 
@@ -286,7 +290,7 @@ class Game():
             - planetary systems ticks
         """
         for p in self.get_all_planetaries():
-            p.tick(wormholes=self.galaxy.get_wormholes())
+            p.tick(opened_wormholes=self.galaxy.get_wormholes())
 
         """
         Galaxy ticks:

@@ -17,7 +17,7 @@ class Planetary(Body):
     def __repr__(self):
         return "Planetary System"
 
-    def __init__(self, name=None, owner=None, star_class=0,
+    def __init__(self, name=None, owner=None, stellar_class=0,
                 planetary_bodies=None, shields=0,
                 defense_system=None, active=True):
 
@@ -26,10 +26,9 @@ class Planetary(Body):
 
         self.name = name
         self.owner = owner
-        self.star_class = star_class
+        self.stellar_class = stellar_class
         self.planetary_bodies = planetary_bodies
         self.shields = shields
-        self.defense_system = defense_system
 
         self.systems = {}
 
@@ -39,7 +38,7 @@ class Planetary(Body):
         self.current_attack = None
 
         self.display_name = "%s, a planetary system class %d" \
-            % (self.name, self.star_class)
+            % (self.name, self.stellar_class)
 
     def get_owner(self):
         return self.owner
@@ -64,6 +63,7 @@ class Planetary(Body):
 
     def uninstall_system(self, system):
         self.systems[system.identifier] = None
+        del self.systems[system.identifier]
 
     def get_system(self, id):
         return self.systems[id]
@@ -71,71 +71,24 @@ class Planetary(Body):
     def get_installed_systems(self):
         return self.systems
 
-    def can_install_system(self, identifier):
-        systems = self.get_available_systems()
-
-        try:
-            system = systems[identifier]
-        except:
-            raise
-
-        try:
-            self.is_all_system_criteria_met(system.criteria)
-        except:
-            raise
-
-        return True
-
     def get_available_systems(self):
         """Return available systems"""
         return {
             wormhole_radar.WormholeRadar.identifier: wormhole_radar.WormholeRadar
         }
 
-    def is_system_criterion_met(self, criterion):
-        """Return True if criterion is met"""
-        met = False
-        player = self.get_owner()
+    def tick(self, opened_wormholes=[]):
 
-        if(criterion["type"] == "allotropes"):
-
-            if(player.get_allotropes() >= criterion["value"]):
-                met = True
-            else:
-                raise CriterionUnmetError("Not enough allotropes")
-
-        elif(criterion["type"] == "workforce"):
-            if(player.get_workforce() >= criterion["value"]):
-                met = True
-            else:
-                raise CriterionUnmetError("Not enough workforce")
-
-        elif(criterion["type"] == "stellar_class"):
-            if(self.star_class >= criterion["value"]):
-                met = True
-            else:
-                raise CriterionUnmetError("Stellar class too low")
-
-        else:
-            raise CriterionTypeUnknownError("Unknown criterion type %s" % str(criterion["type"]))
-
-        return met
-
-    def is_all_system_criteria_met(self, criteria):
-        met = True
-        for criterion in criteria:
-            if not self.is_system_criterion_met(criterion):
-                met = False
-
-        return met
-
-    def tick(self, wormholes=[]):
-
-        # systems will return stuff
-        activity = []
+        # run tick on systems and check that they are still usable
         for k, v in self.systems.iteritems():
-            activity.append(v.tick(wormholes))
 
+            # criteria met?
+            self.get_owner().meets_criteria(v.criteria)
+
+            # tick
+            v.tick(opened_wormholes)
+
+        # if there's someone on the doorstep, create attack
         if(self.hostile_fleets):
 
             # register owner fleets if they are not absent
@@ -160,20 +113,3 @@ class PlanetaryNameError(Exception):
 
     def __str__(self):
         return repr(self.value)
-
-
-class CriterionTypeUnknownError(Exception):
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return repr(self.value)
-
-
-class CriterionUnmetError(Exception):
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return repr(self.value)
-

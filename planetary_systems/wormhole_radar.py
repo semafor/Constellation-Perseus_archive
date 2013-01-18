@@ -12,10 +12,24 @@ class WormholeRadar(PlanetarySystem):
 
     """
     identifier = "wormholeradar"
+
+    # to have it running
     criteria = [
+        {
+            "type": "stellar_class",
+            "value": 0
+        },
+    ]
+
+    # at install
+    costs = [
         {
             "type": "allotropes",
             "value": 100
+        },
+        {
+            "type": "free_workforce",
+            "value": 1
         }
     ]
 
@@ -24,12 +38,14 @@ class WormholeRadar(PlanetarySystem):
 
     def __init__(self):
         PlanetarySystem.__init__(self)
+        self.discovered_wormholes = []
 
     def tick(self, wormholes=[]):
 
-        discovered_wormholes = []
+        self.discovered_wormholes = []
 
         for hole in wormholes:
-            discovered_wormholes.append(hole)
+            self.discovered_wormholes .append(hole)
 
-        return discovered_wormholes
+    def get_discovered_wormholes(self):
+        return self.discovered_wormholes
