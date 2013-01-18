@@ -144,53 +144,7 @@ class Console(cmd.Cmd):
         print "Found %d players:" % len(players)
 
         for player in players:
-
-            ships_of_type = {}
-            for t in self.game.get_available_ships():
-                ships_of_type[t] = 0
-
-            for n, ship in enumerate(player.get_ships()):
-                t = ship.get_name().lower()
-                ships_of_type[t] = ships_of_type[t] + 1
-
-            print "Status for player \"%s\":" % player.get_name()
-            print "\n\tAllotropes: %d" % player.get_allotropes()
-            print "\n\tShips: %d " % len(player.get_ships())
-            print "\n\t\tTypes: %s " % str(ships_of_type)
-            print "\n\t\tPoints: %d " % player.get_ship_total()
-
-            print "\n\tFleets: %d" % (len(player.get_fleets()))
-
-            for n, fleet in enumerate(player.get_fleets()):
-                mission = fleet.get_mission()
-
-                print "\t\tFleet #%d" % (n + 1)
-
-                ships_of_type = {}
-                for t in self.game.get_available_ships():
-                    ships_of_type[t] = 0
-
-                for n, ship in enumerate(fleet.get_ships()):
-                    t = ship.get_name().lower()
-                    ships_of_type[t] = ships_of_type[t] + 1
-
-                if(mission):
-
-                    print "\t\t\t%d ships:\n\t\t\t\t%s" % (len(fleet.get_ships()), str(ships_of_type))
-                    print "\t\t\tMission status: %s" % mission.get_stage()
-
-                    if(mission.get_on_enroute()):
-                        print "\t\t\t\t%sing %s in %d ticks"\
-                            % (mission.get_mission_type(), mission.get_target().get_name(), mission.get_ticks_until_destination())
-                    elif(mission.get_at_destination()):
-                        print "\t\t\t\t%sing %s, attack tick %d"\
-                            % (mission.get_mission_type(), mission.get_target().get_name(), mission.get_stay_tick() + 1)
-                    elif(mission.get_on_return()):
-                        print "\t\t\t\treturning in %d ticks"\
-                            % mission.get_ticks_until_base()
-
-                else:
-                    print "\t\t\t%d ships on base:\n\t\t\t\t%s" % (len(fleet.get_ships()), str(ships_of_type))
+            print player
 
     def do_player(self, args):
         args = shlex.split(args)

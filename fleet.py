@@ -30,6 +30,34 @@ class Fleet():
             which in turn is passed on to the mission
 
     """
+    def __str__(self):
+
+        ships_of_type = {}
+
+        for n, ship in enumerate(self.get_ships()):
+            t = ship.get_name().lower()
+
+            try:
+                ships_of_type[t]
+            except:
+                ships_of_type[t] = 0
+
+            ships_of_type[t] = ships_of_type[t] + 1
+
+        return "\
+            \n\tShips:\t\t%d\
+            \n\tShip types:\t%s\
+            \n\tMission:\t%s\n\
+            "\
+                % (\
+                    len(self.get_ships()),
+                    str(ships_of_type),
+                    str(self.get_mission())
+                )
+
+    def __repr__(self):
+        return "Fleet"
+
     def __init__(self, owner=None):
 
         self.owner = owner

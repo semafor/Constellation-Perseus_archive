@@ -14,11 +14,27 @@ class Player(gameobject.GameObject):
     """
     def __str__(self):
         """Return string representation of player object."""
-        return "Player:\t" + self.name + \
-            "\n\tAllotropes:\t" + str(self.allotropes) + \
-            "\n\tShips:\t\t" + str(len(self.get_ships())) + \
-            "\n\tWorkforce:\t" + str(self.workforce) + \
-            "\n\tPlanetary:\t" + str(self.planetary)
+
+        return "\n=========================\nPlayer:\t %s\n=========================\n\
+            \n\tAllotropes:\t%d\
+            \n\tShips:\t\t%d\
+            \n\tWorkforce:\t%d (Free: %d, Occupied: %d, Disabled: %d)\
+            \n\tPlanetary:\t%s\
+            \n\n\tFleets:\
+            \n\t#1:\
+            \t\t%s\
+            \n\t#2:\
+            \t\t%s\
+            \n\t#3:\
+            \t\t%s"\
+            % \
+                (
+                    self.name, self.allotropes, len(self.get_ships()),
+                    self.workforce.get_size(), self.workforce.get_free(),
+                    self.workforce.get_occupied(), self.workforce.get_disabled(),
+                    str(self.planetary),
+                    self.get_fleet(0), self.get_fleet(1), self.get_fleet(2)
+                )
 
     def __init__(self, name=None,
             allotropes=0, workforce=12,

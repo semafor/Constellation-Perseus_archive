@@ -19,6 +19,29 @@ class Mission():
     - Adds potential gained resources at end
 
     """
+    def __str__(self):
+
+        state = ""
+
+        if(self.get_on_enroute()):
+            state = "%sing %s in %d ticks"\
+                % (self.get_mission_type(), self.get_target().get_name(), self.get_ticks_until_destination())
+        elif(self.get_at_destination()):
+            state = "%sing %s, attack tick %d"\
+                % (self.get_mission_type(), self.get_target().get_name(), self.get_stay_tick() + 1)
+        elif(self.get_on_return()):
+            state = "returning in %d ticks"\
+                % self.get_ticks_until_base()
+        else:
+            state = "at base"
+
+        return "\n\tStatus:\t\t%s\
+            \n\tDetails:\t%s"\
+            % (self.get_stage(), state)
+
+    def __repr__(self):
+        return "Mission"
+
     def __init__(self, mission_type, player, target, stay_time, fleet):
 
         self.player = player
