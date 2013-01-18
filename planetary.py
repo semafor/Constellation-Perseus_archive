@@ -27,6 +27,8 @@ class Planetary(Body):
         self.shields = shields
         self.defense_system = defense_system
 
+        self.systems = {}
+
         self.hostile_fleets = []
         self.friendly_fleets = []
 
@@ -53,7 +55,23 @@ class Planetary(Body):
     def get_friendly_fleets(self):
         return self.friendly_fleets
 
-    def tick(self):
+    def register_system(self, system):
+        self.systems[system.__repr__()] = system
+
+    def deregister_system(self, system):
+        self.systems[system.__repr__()] = None
+
+    def get_system(self, id):
+        return self.systems[id]
+
+    def get_systems(self):
+        return self.systems
+
+    def tick(self, wormholes=[]):
+
+        # systems
+        for k, v in self.systems.iteritems():
+            v.tick(wormholes)
 
         if(self.hostile_fleets):
 

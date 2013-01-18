@@ -3,6 +3,7 @@ import mission
 import player
 import planetary
 import ship
+from planetary_systems import wormhole_radar, planetary_system
 from galaxy import Galaxy
 from planetary_name_generator import generate_name
 
@@ -100,6 +101,17 @@ class Game():
         self.galaxy.add_body(p)
 
         return p
+
+    def create_planetary_system(self, key):
+        system = None
+
+        if(planetary_system.PLANETARYSYSTEMS.count(key) == 0):
+            raise SystemDoesNotExist("System %s does not exist" % str(key))
+
+        if(key == "wormholeradar"):
+            system = wormhole_radar.WormholeRadar()
+
+        return system
 
     def create_ship(self, **kwargs):
         return self.create(ship.Ship, **kwargs)
@@ -207,6 +219,9 @@ class Game():
         m = mission.Mission(modus, initiator, target, target_stay, fleet)
         fleet.set_mission(m)
 
+        # Wormhole in progress, register it
+        self.galaxy.register_wormhole(initiator, target)
+
         return m
 
     def get_by_id(self, thing_id):
@@ -258,13 +273,26 @@ class Game():
         start = time()
         self.tick.next()
 
-        # player tick, updates missions
+        """
+        Player ticks:
+            - updates missions
+        """
         for p in self.get_all_players():
             p.tick()
 
-        # planetary tick, does battles
+        """
+        Planetary ticks:
+            - battles at planetaries
+            - planetary systems ticks
+        """
         for p in self.get_all_planetaries():
-            p.tick()
+            p.tick(wormholes=self.galaxy.get_wormholes())
+
+        """
+        Galaxy ticks:
+            - purges any wormhole activity (should be picked up by now)
+        """
+        self.galaxy.tick()
 
         stop = time()
         print round((stop - start) * 1000.0, 2), "ms"
@@ -285,6 +313,14 @@ class Tick():
     def get_tick(self):
         """Return current tick."""
         return self.current_tick
+
+
+class SystemDoesNotExist(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
 
 
 class GameError(Exception):

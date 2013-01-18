@@ -194,7 +194,7 @@ class Console(cmd.Cmd):
 
     def do_player(self, args):
         args = shlex.split(args)
-        usage = "usage: <player_id|player_name> <status(st)|attack|abort|buy>"
+        usage = "usage: <player_id|player_name> <status(st)|attack|abort|buy|systems>"
         usage_player = "usage: <status(st)|attack|abort|buy>"
 
         usage_attack = "usage attack: <player_id|player_name> <fleet_index>"
@@ -207,6 +207,8 @@ class Console(cmd.Cmd):
 
         usage_buy = "usage buy: <amount> <ship_enum(ain|beid) [fleet_index]"
         usage_allotropes = "usage add|remove: <amount>"
+
+        usage_system = "usage system: <key> <status(st)|activate|deactivate|register|deregister>"
 
         def _new_mission(self, args, mode):
 
@@ -272,18 +274,27 @@ class Console(cmd.Cmd):
             print usage
             return
 
+        """
+        Try looking up player
+        """
         try:
             player = self.normalize_query(args[0])[0]
         except:
             print "Error: cannot find player %s" % str(args[0])
             return
 
+        """
+        Check if there are any actions
+        """
         try:
             action = args[1]
         except:
             print usage_player
             return
 
+        """
+        Abort
+        """
         if(action == "abort"):
             try:
                 args[2]
@@ -294,10 +305,16 @@ class Console(cmd.Cmd):
 
             player.get_fleet(int(args[2])).abort_mission()
 
+        """
+        Status
+        """
         if(action == "status" or action == "st"):
             self.do_player_status(player.get_id())
             return
 
+        """
+        Add/remove (allotropes)
+        """
         if(action == "add" or action == "remove"):
             try:
                 args[2]
@@ -311,13 +328,88 @@ class Console(cmd.Cmd):
             elif(action == "remove"):
                 player.remove_allotropes(int(args[2]))
 
+        """
+        Systems
+        """
+        if(action == "systems"):
+            try:
+                args[2]
+            except:
+                print "Error: missing command"
+                print usage_system
+                return
+
+            try:
+                args[3]
+            except:
+                print "Error: missing system key"
+                print usage_system
+                return
+
+            system_command = args[2]
+            system_key = args[3]
+            system = self.game.create_planetary_system(system_key)
+
+            if(system_command == "status" or system_command == "st"):
+                print system
+                return
+
+            elif(system_command == "activate"):
+                system.activate()
+                print "System activated"
+                print system
+                return
+
+            elif(system_command == "deactivate"):
+                system.deactivate()
+                print "System deactivated"
+                print system
+                return
+
+            elif(system_command == "upgrade"):
+                system.upgrade()
+                print "System upgraded"
+                print system
+                return
+
+            elif(system_command == "downgrade"):
+                system.deactivate()
+                print "System downgraded"
+                print system
+                return
+
+            elif(system_command == "register"):
+                player.get_planetary().register_system(system)
+                print "System registered"
+                return
+
+            elif(system_command == "deregistered"):
+                player.get_planetary().deregister_system(system)
+                print "System deregistered"
+                return
+
+            else:
+                print usage_system
+                return
+
+        """
+        Attack
+        """
         if(action == "attack"):
             _new_mission(self, args, action)
+            return
 
+        """
+        Defend
+        """
         if(action == "defend"):
             _new_mission(self, args, action)
+            return
 
-        elif(action == "buy"):
+        """
+        Buy
+        """
+        if(action == "buy"):
 
             # amount
             try:
@@ -425,6 +517,7 @@ class Console(cmd.Cmd):
             print "Failed to attack"
 
     def do_test(self, args):
+        print "\n=========\nTesting\n=========\n"
         player_a = self.game.create_random_player(allotropes=1000000)
         print "* new player %s (%s)" % (player_a.get_name(), player_a.get_id())
 
@@ -450,6 +543,18 @@ class Console(cmd.Cmd):
         print "\n=========\nEnd of test\n=========\n"
         print player_a
         print player_b
+
+    def do_system_test(self, args):
+        print "\n=========\nSystems testing\n=========\n"
+
+        p = self.game.create_random_player()
+        print "* new player %s (%s)" % (p.get_name(), p.get_id())
+
+        self.do_player("%s systems register wormholeradar" % p.get_name())
+
+        self.do_player("%s systems status wormholeradar" % p.get_name())
+
+        print "\n=========\nEnd of systems testing\n=========\n"
 
     def do_smalltest(self, args):
         player_a = self.game.create_player(name="a", allotropes=1000000)
