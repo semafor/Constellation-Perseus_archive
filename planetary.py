@@ -1,4 +1,5 @@
 from body import Body
+from planetary_systems import wormhole_radar
 import attack
 import force
 
@@ -55,23 +56,31 @@ class Planetary(Body):
     def get_friendly_fleets(self):
         return self.friendly_fleets
 
-    def register_system(self, system):
-        self.systems[system.__repr__()] = system
+    def install_system(self, system):
+        self.systems[system.identifier] = system
 
-    def deregister_system(self, system):
-        self.systems[system.__repr__()] = None
+    def uninstall_system(self, system):
+        self.systems[system.identifier] = None
 
     def get_system(self, id):
         return self.systems[id]
 
-    def get_systems(self):
+    def get_installed_systems(self):
         return self.systems
+
+    def get_installable_systems(self):
+        """Return installable systems"""
+        systems = {
+            wormhole_radar.WormholeRadar.identifier: wormhole_radar.WormholeRadar
+        }
+        return systems
 
     def tick(self, wormholes=[]):
 
-        # systems
+        # systems will return stuff
+        activity = []
         for k, v in self.systems.iteritems():
-            v.tick(wormholes)
+            activity.append(v.tick(wormholes))
 
         if(self.hostile_fleets):
 

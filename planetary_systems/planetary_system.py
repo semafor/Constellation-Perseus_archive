@@ -1,9 +1,7 @@
-PLANETARYSYSTEMS = [
-    "wormholeradar"
-]
-
-
 class PlanetarySystem():
+
+    identifier = "genericsystem"
+
     def __repr__(self):
         return "Planetary System"
 

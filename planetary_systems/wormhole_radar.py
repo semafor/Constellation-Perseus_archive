@@ -11,6 +11,8 @@ class WormholeRadar(PlanetarySystem):
         originating and targetted coordinates
 
     """
+    identifier = "wormholeradar"
+
     def __repr__(self):
         return "Wormhole Radar"
 
@@ -19,5 +21,9 @@ class WormholeRadar(PlanetarySystem):
 
     def tick(self, wormholes=[]):
 
+        discovered_wormholes = []
+
         for hole in wormholes:
-            print "Known wormhole  %s" % str(hole)
+            discovered_wormholes.append(hole)
+
+        return discovered_wormholes

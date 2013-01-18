@@ -195,7 +195,7 @@ class Console(cmd.Cmd):
     def do_player(self, args):
         args = shlex.split(args)
         usage = "usage: <player_id|player_name> <status(st)|attack|abort|buy|systems>"
-        usage_player = "usage: <status(st)|attack|abort|buy>"
+        usage_player = "usage: <status(st)|attack|abort|buy|systems>"
 
         usage_attack = "usage attack: <player_id|player_name> <fleet_index>"
         usage_attack_fleet_index = "usage attack player: <fleet_index>"
@@ -208,7 +208,7 @@ class Console(cmd.Cmd):
         usage_buy = "usage buy: <amount> <ship_enum(ain|beid) [fleet_index]"
         usage_allotropes = "usage add|remove: <amount>"
 
-        usage_system = "usage system: <key> <status(st)|activate|deactivate|register|deregister>"
+        usage_system = "usage system: <status(st)|activate|deactivate|install|uninstall> <identifier(wormholeradar)>"
 
         def _new_mission(self, args, mode):
 
@@ -342,13 +342,31 @@ class Console(cmd.Cmd):
             try:
                 args[3]
             except:
-                print "Error: missing system key"
+                print "Error: missing system identifier"
                 print usage_system
                 return
 
             system_command = args[2]
-            system_key = args[3]
-            system = self.game.create_planetary_system(system_key)
+            system_identifier = args[3]
+
+            if(system_command == "install"):
+
+                system = self.game.create_planetary_system(system_identifier, player)
+
+                if not system:
+                    print "Failed to create system %s" % system_identifier
+                else:
+                    print "Created system %s" % system_identifier
+
+                player.get_planetary().install_system(system)
+                system.activate()
+                return
+            else:
+                try:
+                    system = player.get_planetary().get_system(system_identifier)
+                except:
+                    print "Planetary lacks system %s" % system_identifier
+                    return
 
             if(system_command == "status" or system_command == "st"):
                 print system
@@ -378,14 +396,9 @@ class Console(cmd.Cmd):
                 print system
                 return
 
-            elif(system_command == "register"):
-                player.get_planetary().register_system(system)
-                print "System registered"
-                return
-
-            elif(system_command == "deregistered"):
-                player.get_planetary().deregister_system(system)
-                print "System deregistered"
+            elif(system_command == "uninstall"):
+                player.get_planetary().uninstall_system(system)
+                print "System uninstalled"
                 return
 
             else:
@@ -550,7 +563,15 @@ class Console(cmd.Cmd):
         p = self.game.create_random_player()
         print "* new player %s (%s)" % (p.get_name(), p.get_id())
 
-        self.do_player("%s systems register wormholeradar" % p.get_name())
+        self.do_player("%s systems install wormholeradar" % p.get_name())
+
+        self.do_player("%s systems status wormholeradar" % p.get_name())
+
+        self.do_player("%s systems uninstall wormholeradar" % p.get_name())
+
+        self.do_player("%s systems status wormholeradar" % p.get_name())
+
+        self.do_player("%s systems install wormholeradar" % p.get_name())
 
         self.do_player("%s systems status wormholeradar" % p.get_name())
 

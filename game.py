@@ -3,7 +3,6 @@ import mission
 import player
 import planetary
 import ship
-from planetary_systems import wormhole_radar, planetary_system
 from galaxy import Galaxy
 from planetary_name_generator import generate_name
 
@@ -102,14 +101,16 @@ class Game():
 
         return p
 
-    def create_planetary_system(self, key):
+    def create_planetary_system(self, identifier, player):
+        """Return a system matching the identifier"""
+        installable_systems = player.get_planetary().get_installable_systems()
         system = None
 
-        if(planetary_system.PLANETARYSYSTEMS.count(key) == 0):
-            raise SystemDoesNotExist("System %s does not exist" % str(key))
-
-        if(key == "wormholeradar"):
-            system = wormhole_radar.WormholeRadar()
+        try:
+            system = installable_systems[identifier]()
+        except:
+            print "Failed to create system"
+            pass
 
         return system
 
