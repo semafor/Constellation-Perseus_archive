@@ -1,11 +1,10 @@
 import unittest
-import attack
-import fleet
-import ship
-import force
-import player
-import planetary
+from player.player import Player
+from planetary.planetary import Planetary
 import random
+
+from interstellar import attack, fleet, ship, force
+
 
 SHIPS = 100
 
@@ -13,7 +12,7 @@ SHIPS = 100
 class TestAinVsAin(unittest.TestCase):
 
     def _build_force(self, ship_type, amount, playr, attack_mode):
-        playr = player.Player(name=playr, planetary=planetary.Planetary(playr))
+        playr = Player(name=playr, planetary=Planetary(playr))
         flt = fleet.Fleet(owner=playr)
         ships = []
         for i in range(amount):

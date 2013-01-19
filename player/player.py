@@ -1,8 +1,7 @@
-import fleet
+from interstellar import fleet, mission
 import gameobject
-import player_workforce
 
-from mission import DEFAULT_TRAVEL_TIME
+from workforce import Workforce
 
 
 class Player(gameobject.GameObject):
@@ -46,7 +45,7 @@ class Player(gameobject.GameObject):
         self.name = name
         self.allotropes = allotropes
 
-        self.workforce = player_workforce.PlayerWorkforce(self, workforce)
+        self.workforce = Workforce(self, workforce)
 
         self.planetary = planetary
 
@@ -130,7 +129,7 @@ class Player(gameobject.GameObject):
         assert not self._data_invariant()
 
     def get_travel_time(self):
-        return DEFAULT_TRAVEL_TIME
+        return mission.DEFAULT_TRAVEL_TIME
 
     def get_ship_total(self):
         total = 0

@@ -3,9 +3,9 @@ import cmd
 import game
 import shlex
 
-import player
-import planetary
-import ship
+from player.player import Player
+from planetary.planetary import Planetary
+from interstellar import ship
 
 
 ## console.py
@@ -112,9 +112,9 @@ class Console(cmd.Cmd):
         current_tick = self.game.get_current_tick()
 
         for thing in self.game.get_all_gameobjects():
-            if(isinstance(thing, player.Player)):
+            if(isinstance(thing, Player)):
                 total["players"] = total["players"] + 1
-            elif(isinstance(thing, planetary.Planetary)):
+            elif(isinstance(thing, Planetary)):
                 total["planetaries"] = total["planetaries"] + 1
             elif(isinstance(thing, ship.Ship)):
                 total["ships"] = total["ships"] + 1

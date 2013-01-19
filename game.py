@@ -1,10 +1,9 @@
 import uuid
-import mission
-import player
-import planetary
-import ship
-from galaxy import Galaxy
-from planetary_name_generator import generate_name
+from interstellar import mission, ship
+from player.player import Player
+from planetary.planetary import Planetary
+from planetary.name_generator import generate_name
+from galaxy.galaxy import Galaxy
 
 
 class Game():
@@ -72,7 +71,7 @@ class Game():
 
         kwargs["planetary"] = self.create_planetary(name=planetary_name)
 
-        p = self.create(player.Player, **kwargs)
+        p = self.create(Player, **kwargs)
 
         kwargs["planetary"].set_owner(p)
 
@@ -93,7 +92,7 @@ class Game():
 
         kwargs["name"] = name
 
-        p = self.create(planetary.Planetary, **kwargs)
+        p = self.create(Planetary, **kwargs)
 
         self.planetary_by_name[name] = p
 

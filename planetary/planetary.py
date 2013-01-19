@@ -1,10 +1,9 @@
-from body import Body
-from planetary_systems import wormhole_radar
-import attack
-import force
+from galaxy import body
+from interstellar import attack, force
+import system
 
 
-class Planetary(Body):
+class Planetary(body.Body):
     """Represents a planetary, a star with planetary bodies surrounding it
 
     Exceptions:
@@ -74,7 +73,7 @@ class Planetary(Body):
     def get_available_systems(self):
         """Return available systems"""
         return {
-            wormhole_radar.WormholeRadar.identifier: wormhole_radar.WormholeRadar
+            system.wormhole_radar.WormholeRadar.identifier: system.wormhole_radar.WormholeRadar
         }
 
     def tick(self, opened_wormholes=[]):

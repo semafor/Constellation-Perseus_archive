@@ -1,4 +1,4 @@
-class PlayerWorkforce():
+class Workforce():
     """Represents the players workforce.
         The workforce mans the various systems
     """

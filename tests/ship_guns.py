@@ -1,5 +1,5 @@
 import unittest
-import ship
+from interstellar import ship
 import random
 
 
