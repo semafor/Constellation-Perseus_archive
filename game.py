@@ -101,21 +101,41 @@ class Game():
 
         return p
 
-    def create_planetary_system(self, identifier, player):
+    def install_planetary_system(self, identifier, plyer):
         """Return a system to be installed matching the identifier, raises error if not"""
+        pltary = plyer.get_planetary()
         try:
-            system = player.get_planetary().get_available_systems()[identifier]()
-            player.meets_criteria(system.criteria)
-            player.can_afford_costs(system.costs)
+            system = pltary.get_available_systems()[identifier]()
+
+            # looop through criteria, deduct deductables
+            for criterion in system.criteria:
+
+                criterion.met(plyer)
+
+                try:
+                    criterion.deduct(plyer)
+                except AttributeError:
+                    pass
+                except:
+                    raise
+
         except:
             raise
 
-        try:
-            player.apply_costs(system.costs)
-        except:
-            raise
+        pltary.install_system(system)
 
         return system
+
+    def uninstall_planetary_system(self, system, plyer):
+        for criterion in system.criteria:
+            try:
+                criterion.refund(plyer)
+            except AttributeError:
+                pass
+            except:
+                raise
+
+        plyer.get_planetary().uninstall_system(system)
 
     def create_ship(self, **kwargs):
         return self.create(ship.Ship, **kwargs)
@@ -151,23 +171,23 @@ class Game():
         except:
             return False
 
-        total_amount = available_ships[ship_enum]["price"] * amount
-
-        buyer_allotropes = buyer.get_allotropes()
-
-        #print "total_amount %d, buyer_allotropes %d" % (int(total_amount), int(buyer_allotropes))
-
-        # check if buyer can afford it
-        if (total_amount > buyer_allotropes):
-            return False
+        # criteria
+        try:
+            for criterion in available_ships[ship_enum]["criteria"]:
+                criterion.met(buyer)
+                try:
+                    criterion.deduct(buyer)
+                except AttributeError:
+                    pass
+                except:
+                    raise
+        except:
+            raise
 
         for i in range(amount):
             s = self.create_ship(**available_ships[ship_enum])
 
             ships.append(s)
-
-        # subtract allotropes
-        buyer.set_allotropes(buyer_allotropes - total_amount)
 
         buyer.add_ships(ships, fleet_index)
 

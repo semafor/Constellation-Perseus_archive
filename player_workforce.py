@@ -45,6 +45,14 @@ class PlayerWorkforce():
 
         return True
 
+    def free_workforce(self, amount):
+        assert not self._data_invariant()
+
+        self.statuses["free"] = self.statuses["free"] + amount
+        self.statuses["occupied"] = self.statuses["occupied"] - amount
+
+        assert not self._data_invariant()
+
     def disable_workforce(self, amount):
         """Disables free, then occupied workforce"""
         assert not self._data_invariant()

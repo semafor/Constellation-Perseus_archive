@@ -307,7 +307,7 @@ class Console(cmd.Cmd):
                 system = None
 
                 try:
-                    system = self.game.create_planetary_system(system_identifier, player)
+                    system = self.game.install_planetary_system(system_identifier, player)
                 except Exception as e:
                     print "Cannot create %s due to %s" % (system_identifier, e)
                     system = None
@@ -318,7 +318,6 @@ class Console(cmd.Cmd):
                 else:
                     print "Created system %s" % system_identifier
 
-                player.get_planetary().install_system(system)
                 system.activate()
                 return
             else:
@@ -357,7 +356,7 @@ class Console(cmd.Cmd):
                 return
 
             elif(system_command == "uninstall"):
-                player.get_planetary().uninstall_system(system)
+                self.game.uninstall_planetary_system(system, player)
                 print "System uninstalled"
                 return
 
@@ -406,9 +405,6 @@ class Console(cmd.Cmd):
 
             try:
                 result = self.game.buy_ships(player, ship_enum, amount, fleet_index)
-            except game.GameException as e:
-                print "Failed to buy: %s" % e
-                return
             except Exception as e:
                 print e
                 print usage_buy
@@ -536,6 +532,8 @@ class Console(cmd.Cmd):
         self.do_player("%s systems status wormholeradar" % p.get_name())
 
         self.do_player("%s systems uninstall wormholeradar" % p.get_name())
+
+        self.do_player("%s st" % p.get_name())
 
         self.do_player("%s systems status wormholeradar" % p.get_name())
 

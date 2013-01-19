@@ -17,7 +17,7 @@ class Planetary(Body):
     def __repr__(self):
         return "Planetary System"
 
-    def __init__(self, name=None, owner=None, stellar_class=0,
+    def __init__(self, name=None, owner=None, stellar_class=1,
                 planetary_bodies=None, shields=0,
                 defense_system=None, active=True):
 
