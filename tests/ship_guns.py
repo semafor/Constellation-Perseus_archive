@@ -15,7 +15,7 @@ class TestShipGunAPI(unittest.TestCase):
             "Created ain, the Ship")
 
     def test_gun_states_are_nil(self):
-        self.assertEqual(self.ain.get_warm_guns(), 0,\
+        self.assertEqual(self.ain.get_warm_guns(), 1,\
             "Ship has 0 warm guns")
 
     def test_gun_with_state_nil_are_lt_nil(self):

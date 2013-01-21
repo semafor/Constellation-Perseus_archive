@@ -1,7 +1,9 @@
 import os
 import cmd
-import game
+from game import Game
 import shlex
+import interface.player
+import interface.buy
 
 from player.player import Player
 from planetary.planetary import Planetary
@@ -18,27 +20,7 @@ class Console(cmd.Cmd):
     def __init__(self):
         cmd.Cmd.__init__(self)
         self.prompt = "game> "
-        self.intro = "Welcome to an Untitled MMO FTL-like text-based spacegame"
-
-    def normalize_query(self, query):
-        result = None
-
-        try:
-            by_name = self.game.get_by_name(query)
-        except:
-            by_name = None
-
-        try:
-            by_id = self.game.get_by_id(query)
-        except:
-            by_id = None
-
-        if(by_name):
-            result = by_name
-        elif(by_id):
-            result = [by_id]
-
-        return result
+        self.intro = "Welcome to Constellation Perseus, a MMO FTL-like text-based spacegame"
 
     def do_new(self, args):
         """Create a game object"""
@@ -90,7 +72,7 @@ class Console(cmd.Cmd):
             print "usage: get id|name"
             return
 
-        res = self.normalize_query(args)
+        res = self.game.search(args)
 
         if(res):
             print "Found %d objects:" % len(res)
@@ -128,101 +110,16 @@ class Console(cmd.Cmd):
         print "Current tick: %d" % current_tick
 
     def do_player_status(self, player_search):
-        """Print player status"""
-        usage = "usage: player_status id|name"
-
-        if(player_search == ""):
-            print usage
-            return
-
-        players = self.normalize_query(player_search)
-
-        if not players:
-            print "Error: cannot find player %s" % player_search
-            return
-
-        print "Found %d players:" % len(players)
-
-        for player in players:
-            print player
+        interface.player.status(self.game, player_search)
 
     def do_player(self, args):
         args = shlex.split(args)
         usage = "usage: <player_id|player_name> <status(st)|attack|abort|buy|systems>"
         usage_player = "usage: <status(st)|attack|abort|buy|systems>"
 
-        usage_attack = "usage attack: <player_id|player_name> <fleet_index>"
-        usage_attack_fleet_index = "usage attack player: <fleet_index>"
-
-        usage_defend = "usage defend: <player_id|player_name> <fleet_index>"
-        usage_defend_fleet_index = "usage defend player: <fleet_index>"
-
         usage_abort = "usage abort: <fleet_index>"
 
-        usage_buy = "usage buy: <amount> <ship_enum(ain|beid) [fleet_index]"
         usage_allotropes = "usage add|remove: <amount>"
-
-        usage_system = "usage system: <status(st)|activate|deactivate|install|uninstall> <identifier(wormholeradar)>"
-
-        def _new_mission(self, args, mode):
-
-            if not mode:
-                raise ValueError("_new_mission missing mode")
-
-            if(mode == "attack"):
-                _usage = usage_attack
-                _usage_fleet = usage_attack_fleet_index
-            elif(mode == "defend"):
-                _usage = usage_defend
-                _usage_fleet = usage_defend_fleet_index
-
-            try:
-                args[2]
-            except:
-                print "Error: missing target"
-                print _usage
-                return
-
-            try:
-                args[3]
-            except:
-                print "Error: missing fleet_index"
-                print _usage_fleet
-                return
-
-            # target
-            try:
-                target = self.normalize_query(args[2])[0]
-            except:
-                print "Error: cannot find player %s" % str(args[2])
-                return
-
-            if(player == target):
-                print "Error: cannot %s self" % mode
-                return
-
-            # fleet
-            try:
-                fleet_index = int(args[3])
-            except:
-                print "Error: could not convert fleet index %s to int " % str(args[3])
-                return
-
-            try:
-                if(mode == "attack"):
-                    mission = self.game.attack(player, target, fleet_index, 3)
-                elif(mode == "defend"):
-                    mission = self.game.defend(player, target, fleet_index, 3)
-
-            except Exception as e:
-                print "Failed to attack: %s" % e
-                print _usage
-                return
-
-            if(mission):
-                print "Player %s is %sing player %s. Current stage: %s"\
-                    % (mission.get_player().get_name(), mode, mission.get_target().get_name(), mission.get_stage())
-                return
 
         if not args:
             print usage
@@ -232,7 +129,7 @@ class Console(cmd.Cmd):
         Try looking up player
         """
         try:
-            player = self.normalize_query(args[0])[0]
+            player = self.game.search(args[0])[0]
         except:
             print "Error: cannot find player %s" % str(args[0])
             return
@@ -286,195 +183,50 @@ class Console(cmd.Cmd):
         Systems
         """
         if(action == "systems"):
-            try:
-                args[2]
-            except:
-                print "Error: missing command"
-                print usage_system
-                return
-
-            try:
-                args[3]
-            except:
-                print "Error: missing system identifier"
-                print usage_system
-                return
-
-            system_command = args[2]
-            system_identifier = args[3]
-
-            if(system_command == "install"):
-                system = None
-
-                try:
-                    system = self.game.install_planetary_system(system_identifier, player)
-                except Exception as e:
-                    print "Cannot create %s due to %s" % (system_identifier, e)
-                    system = None
-
-                if not system:
-                    print "Failed to create system %s" % system_identifier
-                    return
-                else:
-                    print "Created system %s" % system_identifier
-
-                system.activate()
-                return
-            else:
-                try:
-                    system = player.get_planetary().get_system(system_identifier)
-                except:
-                    print "Planetary lacks system %s" % system_identifier
-                    return
-
-            if(system_command == "status" or system_command == "st"):
-                print system
-                return
-
-            elif(system_command == "activate"):
-                system.activate()
-                print "System activated"
-                print system
-                return
-
-            elif(system_command == "deactivate"):
-                system.deactivate()
-                print "System deactivated"
-                print system
-                return
-
-            elif(system_command == "upgrade"):
-                system.upgrade()
-                print "System upgraded"
-                print system
-                return
-
-            elif(system_command == "downgrade"):
-                system.deactivate()
-                print "System downgraded"
-                print system
-                return
-
-            elif(system_command == "uninstall"):
-                self.game.uninstall_planetary_system(system, player)
-                print "System uninstalled"
-                return
-
-            else:
-                print usage_system
-                return
+            interface.player.system(self.game, player, args[2], args[3])
+            return
 
         """
         Attack
         """
         if(action == "attack"):
-            _new_mission(self, args, action)
+            interface.player._new_mission(self.game, player, args, action)
             return
 
         """
         Defend
         """
         if(action == "defend"):
-            _new_mission(self, args, action)
+            interface.player._new_mission(self.game, player, args, action)
             return
 
         """
         Buy
         """
         if(action == "buy"):
-
-            # amount
-            try:
-                amount = int(args[2])
-            except:
-                print usage_buy
-                return
-
-            # ship
-            try:
-                ship_enum = args[3]
-            except:
-                print usage_buy
-                return
-
-            # fleet_index
-            try:
-                fleet_index = int(args[4])
-            except:
-                fleet_index = 0
-
-            try:
-                result = self.game.buy_ships(player, ship_enum, amount, fleet_index)
-            except Exception as e:
-                print e
-                print usage_buy
-                return
-
-            if(result):
-                print "Bought %d ships of type %s for player %s (%s)" % (amount, ship_enum, player.get_name(), player.get_id())
-            else:
-                print "Failed to buy ships."
+            interface.player.buy(self.game, player, args)
 
     def do_status(self, args):
         """See st"""
         self.do_st(args)
 
-    def do_tick(self, args):
+    def do_tick(self):
         """Control the ticker"""
-        if(args == "next"):
-            self.game.next_tick()
-            print "Current tick: %d" % self.game.get_current_tick()
-        else:
-            print " \nCurrent tick: %d" % self.game.get_current_tick()
-            print "usage: next"
+        self.game.next_tick()
+        print " \nCurrent tick: %d" % self.game.get_current_tick()
 
     def do_buy(self, args):
         """Buy ships for a player"""
         args = shlex.split(args)
-        help_usage = "usage: buy <player_id|player_name> <ship_enum(ain|beid)> <amount>"
-
-        try:
-            player_search = args[0]
-        except:
-            print help_usage
-            return
-
-        player = self.normalize_query(player_search)
-
-        if not player:
-            print "Error: cannot find player"
-            return
-        else:
-            player = player[0]
-
-        try:
-            ship_enum = args[1]
-        except:
-            print help_usage
-            return
-
-        try:
-            amount = int(args[2])
-        except:
-            print help_usage
-            return
-
-        #print "do_buy args: player_id %s, ship_enum: %s, amount %s" % (player_id, ship_enum, amount)
-
-        result = self.game.buy_ships(player, ship_enum, amount)
-
-        if(result):
-            print "Bought %d ships of type %s for player %s (%s)" % (amount, ship_enum, player.get_name(), player.get_id())
-        else:
-            print "Failed to buy ships."
+        interface.buy(self.game, args)
 
     def do_attack(self, args):
         """Execute attack"""
         args = shlex.split(args)
         help_usage = "usage: attack <attacker> <defender> <fleet_index> <n ticks length of attack>"
 
-        attacker = self.normalize_query(args[0])[0]
-        defender = self.normalize_query(args[1])[0]
+        attacker = self.game.search(args[0])[0]
+        defender = self.game.search(args[1])[0]
         fleet_index = int(args[2])
         attack_length = int(args[3])
 
@@ -482,8 +234,11 @@ class Console(cmd.Cmd):
 
         if mission:
             print "Player %s is attacking player %s. Current stage: %s" % (mission.get_player().get_name(), mission.get_target().get_name(), mission.get_stage())
+            return
         else:
             print "Failed to attack"
+            print help_usage
+            return
 
     def do_test(self, args):
         print "\n=========\nTesting\n=========\n"
@@ -507,7 +262,7 @@ class Console(cmd.Cmd):
 
         self.do_player("%s attack %s 0" % (player_a_name, player_b_name))
         for i in range(10):
-            self.do_tick("next")
+            self.do_tick()
 
         print "\n=========\nEnd of test\n=========\n"
         print player_a
@@ -597,25 +352,7 @@ class Console(cmd.Cmd):
         self._locals = {}      # Initialize execution namespace for user
         self._globals = {}
 
-        #
-        # game stuffs
-        #
-        self.game = game.Game()
-
-        #player = self.game.create_player(name="Dummy Player", allotropes=10000)
-        #print "* new player %s (%s)" % (player.get_name(), player.get_id())
-
-        #planetary = self.game.create(game.Planetary, name="Dummy Planetary")
-        #print "* new planetary %s (%s)" % (planetary.get_name(), planetary.get_id())
-
-        #owned_planetary = self.game.create(game.Planetary, name="Owned Planetary")
-        #self.game.get_by_id(owned_planetary).set_owner(player)
-        #owned_planetary_name = self.game.get_by_id(owned_planetary).get_name()
-        #planetary_owner = self.game.get_by_id(self.game.get_by_id(owned_planetary).get_owner()).get_display_name()
-        #print "* new planetary %s, (%s) owned by %s" \
-        #    % (owned_planetary_name, owned_planetary, planetary_owner)
-
-        #self.game.buy_ships(player, "ain", 4)
+        self.game = Game()
 
     def postloop(self):
         """Take care of any unfinished business.

@@ -1,4 +1,4 @@
-from planetary_system import PlanetarySystem
+from system import PlanetarySystem
 from criterion import WorkforceCriterion, AllotropeCriterion, StellarClassCriterion
 
 

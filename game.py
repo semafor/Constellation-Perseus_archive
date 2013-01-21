@@ -20,6 +20,26 @@ class Game():
         self.tick = Tick()
         self.galaxy = Galaxy()
 
+    def search(self, query):
+        result = None
+
+        try:
+            by_name = self.get_by_name(query)
+        except:
+            by_name = None
+
+        try:
+            by_id = self.get_by_id(query)
+        except:
+            by_id = None
+
+        if(by_name):
+            result = by_name
+        elif(by_id):
+            result = [by_id]
+
+        return result
+
     def create(self, what, **kwargs):
         """Return a GameObject.
 
@@ -100,19 +120,19 @@ class Game():
 
         return p
 
-    def install_planetary_system(self, identifier, plyer):
+    def install_planetary_system(self, identifier, player):
         """Return a system to be installed matching the identifier, raises error if not"""
-        pltary = plyer.get_planetary()
+        planetary = player.get_planetary()
         try:
-            system = pltary.get_available_systems()[identifier]()
+            system = planetary.get_available_systems()[identifier]()
 
             # looop through criteria, deduct deductables
             for criterion in system.criteria:
 
-                criterion.met(plyer)
+                criterion.met(player)
 
                 try:
-                    criterion.deduct(plyer)
+                    criterion.deduct(player)
                 except AttributeError:
                     pass
                 except:
@@ -121,20 +141,20 @@ class Game():
         except:
             raise
 
-        pltary.install_system(system)
+        planetary.install_system(system)
 
         return system
 
-    def uninstall_planetary_system(self, system, plyer):
+    def uninstall_planetary_system(self, system, player):
         for criterion in system.criteria:
             try:
-                criterion.refund(plyer)
+                criterion.refund(player)
             except AttributeError:
                 pass
             except:
                 raise
 
-        plyer.get_planetary().uninstall_system(system)
+        player.get_planetary().uninstall_system(system)
 
     def create_ship(self, **kwargs):
         return self.create(ship.Ship, **kwargs)

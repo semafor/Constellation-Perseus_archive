@@ -1,6 +1,7 @@
 from galaxy import body
 from interstellar import attack, force
 import system
+import wormhole_radar
 
 
 class Planetary(body.Body):
@@ -73,7 +74,7 @@ class Planetary(body.Body):
     def get_available_systems(self):
         """Return available systems"""
         return {
-            system.wormhole_radar.WormholeRadar.identifier: system.wormhole_radar.WormholeRadar
+            wormhole_radar.WormholeRadar.identifier: wormhole_radar.WormholeRadar
         }
 
     def tick(self, opened_wormholes=[]):
