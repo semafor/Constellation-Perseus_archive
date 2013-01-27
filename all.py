@@ -286,16 +286,6 @@ class Console(cmd.Cmd):
 
         self.do_player("%s systems status wormholeradar" % p.get_name())
 
-        self.do_player("%s systems uninstall wormholeradar" % p.get_name())
-
-        self.do_player("%s st" % p.get_name())
-
-        self.do_player("%s systems status wormholeradar" % p.get_name())
-
-        self.do_player("%s systems install wormholeradar" % p.get_name())
-
-        self.do_player("%s systems status wormholeradar" % p.get_name())
-
         self.do_player("%s st" % p.get_name())
 
         print "\n=========\nEnd of systems testing\n=========\n"

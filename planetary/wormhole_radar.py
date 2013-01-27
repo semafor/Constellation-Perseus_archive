@@ -1,5 +1,6 @@
 from system import PlanetarySystem
-from criterion import WorkforceCriterion, AllotropeCriterion, StellarClassCriterion
+from criterion import StellarClassCriterion
+from costs import AllotropeCost, WorkforceCost
 
 
 class WormholeRadar(PlanetarySystem):
@@ -16,9 +17,11 @@ class WormholeRadar(PlanetarySystem):
 
     # to run/install
     criteria = [
-        StellarClassCriterion(0),
-        AllotropeCriterion(100, refundable=True),
-        WorkforceCriterion(1, refundable=True)
+        StellarClassCriterion(0)
+    ]
+    costs = [
+        WorkforceCost(1, refundable=True),
+        AllotropeCost(100)
     ]
 
     def __repr__(self):

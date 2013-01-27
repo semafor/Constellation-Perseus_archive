@@ -157,6 +157,83 @@ class Player(gameobject.GameObject):
 
         assert not self._data_invariant()
 
+    def apply_costs(self, costs, coefficient=1):
+        """Loop through costs and apply them individually"""
+        withdraw = True
+
+        for cost in costs:
+            self.apply_cost(cost, coefficient, withdraw)
+
+        return True
+
+    def is_costs_applicable(self, costs, coefficient=1):
+        """Return True if cost is applicable, False if not"""
+        applicable = True
+        withdraw = False
+
+        for cost in costs:
+            try:
+                self.apply_cost(cost, coefficient, withdraw)
+            except:
+                applicable = False
+
+        return applicable
+
+    def apply_cost(self, cost, coefficient, withdraw, revert=False,):
+        """Apply a Cost on a Player, raise CostError if the cost cannot be applied"""
+
+        assert not self._data_invariant()
+
+        applied = False
+
+        cost_value = cost.get_value()
+        cost_type = repr(cost)
+
+        if cost_type == 'Workforce Cost':
+            if cost_value <= self.get_workforce().get_free():
+                if withdraw:
+                    self.get_workforce().use_workforce(cost_value)
+                applied = True
+        elif cost_type == 'Allotrope Cost':
+            cost_value = cost.get_multiplied_value(coefficient)
+            if cost_value <= self.get_allotropes():
+                applied = True
+                if withdraw:
+                    self.remove_allotropes(cost_value)
+
+        # cost not applied, let cost raise CostError
+        if not applied:
+            cost.unsuccessful()
+
+        assert not self._data_invariant()
+
+    def test_criteria(self, criteria):
+        """Return True if criteria are satisfied, False if not"""
+        met = True
+
+        for criterion in criteria:
+            try:
+                self.test_criterion(criterion)
+            except:
+                met = False
+
+        return met
+
+    def test_criterion(self, criterion):
+        met = False
+
+        criterion_value = criterion.get_value()
+        criterion_type = repr(criterion)
+
+        if criterion_type == 'Stellar Class Criterion':
+            if criterion_value <= self.get_planetary().stellar_class:
+                met = True
+
+        if not met:
+            criterion.unmet()
+
+        return met
+
     def _data_invariant(self):
         if not __debug__:
             return None

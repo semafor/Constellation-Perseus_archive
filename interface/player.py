@@ -44,13 +44,8 @@ def system(game, player, command, identifier):
     system_identifier = identifier
 
     if(system_command == "install"):
-        system = None
 
-        try:
-            system = game.install_planetary_system(system_identifier, player)
-        except Exception as e:
-            print "Cannot create %s due to %s" % (system_identifier, e)
-            system = None
+        system = game.install_planetary_system(system_identifier, player)
 
         if not system:
             print "Failed to create system %s" % system_identifier
@@ -58,7 +53,8 @@ def system(game, player, command, identifier):
         else:
             print "Created system %s" % system_identifier
 
-        system.activate()
+        player.get_planetary().get_system(system_identifier).activate()
+
         return
     else:
         try:
@@ -178,6 +174,7 @@ def _new_mission(game, player, args, mode):
 def buy(game, player, args):
 
     usage_buy = "usage buy: <amount> <ship_enum(ain|beid) [fleet_index]"
+    available_ships = game.get_available_ships()
 
     # amount
     try:
@@ -198,6 +195,16 @@ def buy(game, player, args):
         fleet_index = int(args[4])
     except:
         fleet_index = 0
+
+    if not player.test_criteria(available_ships[ship_enum]["criteria"]):
+        print "Player does not meet criteria: %s" %\
+            str(available_ships[ship_enum]["criteria"])
+        return
+
+    if not player.is_costs_applicable(available_ships[ship_enum]["costs"], coefficient=amount):
+        print "Player cannot affor cost: %s" %\
+            str(available_ships[ship_enum]["costs"])
+        return
 
     try:
         result = game.buy_ships(player, ship_enum, amount, fleet_index)

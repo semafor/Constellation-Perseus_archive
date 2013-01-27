@@ -1,7 +1,9 @@
 import gameobject
-from criterion import AllotropeCriterion, StellarClassCriterion
+from criterion import StellarClassCriterion
+from costs import AllotropeCost
 from math import floor
 from random import randint
+
 
 class Ship(gameobject.GameObject):
     """Represents a ship
@@ -21,7 +23,7 @@ class Ship(gameobject.GameObject):
         """Return string representation of Ship object."""
         return "%s: \t %s (%s), hull: %s" % (self, self.name, str(self.ship_class), str(self.hull))
 
-    def __init__(self, name=None, ship_class=1, criteria={},
+    def __init__(self, name=None, ship_class=1, criteria=[], costs=[],
 
             evade=0, hull=0, counter_measures=None,
 
@@ -36,6 +38,8 @@ class Ship(gameobject.GameObject):
         self.hull = hull
         self.counter_measures = counter_measures
         self.criteria = criteria
+
+        self.costs = costs
 
         # guns
         self.guns = guns
@@ -58,8 +62,8 @@ class Ship(gameobject.GameObject):
         if ship_class == 0 or ship_class > len(CLASSES):
             raise ShipClassDoesNotExistError("ship_class %s is N/A " % str(ship_class))
 
-        self.display_name = "%s, a ship, class %d, costing %d" \
-            % (self.name, self.ship_class, self.get_price())
+        self.display_name = "%s, a ship, class %d, costing %s" \
+            % (self.name, self.ship_class, str(self.get_costs()))
 
         if __debug__:
             self.data_invariant()
@@ -102,10 +106,8 @@ class Ship(gameobject.GameObject):
     def get_intimidation(self):
         return self.get_class_index() * 10
 
-    def get_price(self):
-        for criterion in self.criteria:
-            if(isinstance(criterion, AllotropeCriterion)):
-                return criterion.get_value()
+    def get_costs(self):
+        return self.costs
 
     def get_shields(self):
         return self.shields
@@ -351,7 +353,7 @@ class Ship(gameobject.GameObject):
             "evade": str(self.evade),
             "hull": str(self.hull),
             "counter_measures": str(self.counter_measures),
-            "price": str(self.get_price()),
+            "cost": str(self.get_costs()),
 
             "guns": str(self.guns),
             "guns_warm_temperature": str(self.guns_warm_temperature),
@@ -417,9 +419,11 @@ class Ship(gameobject.GameObject):
         if not self.is_hull_intact() and self._fleet:
             raise DestroyedShipStillInFleetError("Ship still in fleet while destroyed")
 
-        # price
-        if(type(self.get_price()) != type(1)):
-            raise AssertionError("Price %s not an int" % str(self.get_price()))
+        # cost
+        try:
+            self.get_costs()[0].get_value()
+        except:
+            raise
 
         # guns
         if(type(self.guns) != type(1)):
@@ -462,7 +466,9 @@ TYPES = {
         "ship_class": 1,
         "criteria": [
             StellarClassCriterion(1),
-            AllotropeCriterion(100)
+        ],
+        "costs": [
+            AllotropeCost(1000000)
         ],
         "hull": 150,
         "guns": 5,
@@ -475,7 +481,9 @@ TYPES = {
         "ship_class": 1,
         "criteria": [
             StellarClassCriterion(1),
-            AllotropeCriterion(250)
+        ],
+        "costs": [
+            AllotropeCost(250)
         ],
         "hull": 250,
         "guns": 10,
@@ -487,8 +495,10 @@ TYPES = {
         "name": "Canopus",
         "ship_class": 3,
         "criteria": [
-            StellarClassCriterion(5),
-            AllotropeCriterion(500)
+            StellarClassCriterion(3),
+        ],
+        "costs": [
+            AllotropeCost(500)
         ],
         "hull": 1000,
         "guns": 250,
