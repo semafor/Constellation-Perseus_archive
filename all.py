@@ -157,6 +157,12 @@ class Console(cmd.Cmd):
             player.get_fleet(int(args[2])).abort_mission()
 
         """
+        Nearby
+        """
+        if(action == "nearby"):
+            interface.player.nearby(self.game, player)
+
+        """
         Status
         """
         if(action == "status" or action == "st"):
@@ -282,9 +288,11 @@ class Console(cmd.Cmd):
 
         self.do_player("%s st" % p.get_name())
 
-        self.do_player("%s systems install wormholeradar" % p.get_name())
+        self.do_player("%s systems install gramebo" % p.get_name())
 
-        self.do_player("%s systems status wormholeradar" % p.get_name())
+        self.do_player("%s systems status gramebo" % p.get_name())
+
+        self.do_player("%s systems activate gramebo" % p.get_name())
 
         self.do_player("%s st" % p.get_name())
 

@@ -2,6 +2,7 @@ from galaxy import body
 from interstellar import attack, force
 import system
 import wormhole_radar
+import gravitation_lens_detector
 
 
 class Planetary(body.Body):
@@ -74,19 +75,17 @@ class Planetary(body.Body):
     def get_available_systems(self):
         """Return available systems"""
         return {
-            wormhole_radar.WormholeRadar.identifier: wormhole_radar.WormholeRadar
+            wormhole_radar.WormholeRadar.identifier: wormhole_radar.WormholeRadar,
+            gravitation_lens_detector.GravitationLensDetector.identifier: gravitation_lens_detector.GravitationLensDetector,
         }
 
-    def tick(self, opened_wormholes=[]):
+    def tick(self, game):
 
         # run tick on systems and check that they are still usable
         for k, v in self.systems.iteritems():
 
-            # criteria met?
-            self.get_owner().meets_criteria(v.criteria)
-
             # tick
-            v.tick(opened_wormholes)
+            v.tick(game, self)
 
         # if there's someone on the doorstep, create attack
         if(self.hostile_fleets):

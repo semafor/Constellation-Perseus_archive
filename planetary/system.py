@@ -33,6 +33,9 @@ class PlanetarySystem():
 
         assert not self._data_invariant()
 
+    def get_active(self):
+        return self.active
+
     def get_level(self):
         return self.level
 

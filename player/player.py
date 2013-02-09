@@ -141,7 +141,7 @@ class Player(gameobject.GameObject):
     def get_allotropes_per_tick(self):
         return len(self.get_ships()) + self.get_workforce().get_size() * 100
 
-    def tick(self):
+    def tick(self, game):
         assert not self._data_invariant()
 
         #print "Tick on %s" % self.get_display_name()
@@ -186,16 +186,25 @@ class Player(gameobject.GameObject):
 
         applied = False
 
-        cost_value = cost.get_value()
+        cost_value = cost.get_multiplied_value(coefficient)
         cost_type = repr(cost)
 
         if cost_type == 'Workforce Cost':
+
+            if revert:
+                self.get_workforce().free_workforce(cost_value)
+                return
+
             if cost_value <= self.get_workforce().get_free():
                 if withdraw:
                     self.get_workforce().use_workforce(cost_value)
                 applied = True
         elif cost_type == 'Allotrope Cost':
-            cost_value = cost.get_multiplied_value(coefficient)
+
+            if revert:
+                self.add_allotropes(cost_value)
+                return
+
             if cost_value <= self.get_allotropes():
                 applied = True
                 if withdraw:

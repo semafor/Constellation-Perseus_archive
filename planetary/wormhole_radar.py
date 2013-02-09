@@ -1,6 +1,6 @@
 from system import PlanetarySystem
 from criterion import StellarClassCriterion
-from costs import AllotropeCost, WorkforceCost
+from costs import WorkforceCost
 
 
 class WormholeRadar(PlanetarySystem):
@@ -20,8 +20,7 @@ class WormholeRadar(PlanetarySystem):
         StellarClassCriterion(0)
     ]
     costs = [
-        WorkforceCost(1, refundable=True),
-        AllotropeCost(100)
+        WorkforceCost(1, refundable=True)
     ]
 
     def __repr__(self):
@@ -33,10 +32,12 @@ class WormholeRadar(PlanetarySystem):
 
     def tick(self, wormholes=[]):
 
-        self.discovered_wormholes = []
+        if self.get_active():
 
-        for hole in wormholes:
-            self.discovered_wormholes .append(hole)
+            self.discovered_wormholes = []
+
+            for hole in wormholes:
+                self.discovered_wormholes .append(hole)
 
     def get_discovered_wormholes(self):
         return self.discovered_wormholes

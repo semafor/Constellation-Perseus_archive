@@ -23,6 +23,9 @@ class Game:
         self.tick = Tick()
         self.galaxy = Galaxy()
 
+        # generate a bunch of rocks in the universe
+        self.galaxy.create_random_bodies(1000)
+
     def search(self, query):
         result = None
 
@@ -133,7 +136,7 @@ class Game:
         return p
 
     def install_planetary_system(self, identifier, player):
-        """Return a system to be installed matching the identifier, raises error if not"""
+        """Return True if system was installed, False if not"""
 
         planetary = player.get_planetary()
 
@@ -142,11 +145,6 @@ class Game:
         if not player.test_criteria(system.criteria):
             return False
 
-        if not player.is_costs_applicable(system.costs):
-            return False
-
-        player.apply_costs(system.costs)
-
         planetary.install_system(system)
 
         return True
@@ -154,6 +152,23 @@ class Game:
     def uninstall_planetary_system(self, system, player):
         pass
         #player.get_planetary().uninstall_system(system)
+
+    def activate_planetary_system(self, identifier, player):
+        system = player.get_planetary().get_system(identifier)
+
+        if not player.is_costs_applicable(system.costs, coefficient=system.get_level()):
+            return False
+
+        player.apply_costs(system.costs, coefficient=system.get_level())
+
+        system.activate()
+
+    def deactivate_planetary_system(self, identifier, player):
+        system = player.get_planetary().get_system(identifier)
+
+        player.apply_costs(system.costs, revert=True)
+
+        system.deactivate()
 
     def create_ship(self, **kwargs):
         return self.create(ship.Ship, **kwargs)
@@ -340,10 +355,10 @@ class Game:
         self.tick.next()
 
         for p in self.get_all_players():
-            p.tick()
+            p.tick(self)
 
         for p in self.get_all_planetaries():
-            p.tick(opened_wormholes=self.galaxy.get_wormholes())
+            p.tick(self)
 
         self.galaxy.tick()
 

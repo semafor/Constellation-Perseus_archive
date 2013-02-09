@@ -468,7 +468,7 @@ TYPES = {
             StellarClassCriterion(1),
         ],
         "costs": [
-            AllotropeCost(1000000)
+            AllotropeCost(100)
         ],
         "hull": 150,
         "guns": 5,

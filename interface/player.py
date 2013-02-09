@@ -53,8 +53,6 @@ def system(game, player, command, identifier):
         else:
             print "Created system %s" % system_identifier
 
-        player.get_planetary().get_system(system_identifier).activate()
-
         return
     else:
         try:
@@ -68,13 +66,13 @@ def system(game, player, command, identifier):
         return
 
     elif(system_command == "activate"):
-        system.activate()
+        game.activate_planetary_system(system_identifier, player)
         print "System activated"
         print system
         return
 
     elif(system_command == "deactivate"):
-        system.deactivate()
+        game.deactivate_planetary_system(system_identifier, player)
         print "System deactivated"
         print system
         return
@@ -218,3 +216,14 @@ def buy(game, player, args):
             % (amount, ship_enum, player.get_name(), player.get_id())
     else:
         print "Failed to buy ships."
+
+
+def nearby(game, player):
+
+    usage_nearby = "usage nearby"
+
+    if not player:
+        print usage_nearby
+        return
+
+    game.galaxy.get_neighbouring_bodies(player.get_planetary())
